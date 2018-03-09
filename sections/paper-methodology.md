@@ -2,6 +2,8 @@
 
 We begin applying unimodality clustering to motif discovery with a discussion on implementing the UniDip algorithm, because algorithms in practice are never as simple as they are in theory.
 
+The original SkinnyDip algorithm was implemented in R, We decided to port this example to Python for because other primary bioinformatics tools [cite BioPython] are already implemented in Python, We would need potentially be needing to make changes to the algorithm, and the original source code included extra algorithms we would not need for our tests. Overall porting this software went 
+
 P-vals
 
 mirroring

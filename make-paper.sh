@@ -1,9 +1,13 @@
-usage="$(basename "$0") [-h] [outputFile] -- Builds Motif Paper"
-while getopts ':hs:' option; do
+usage="$(basename "$0") [-h] [-o outputFile] [-t outputFormat] -- Builds Motif Paper"
+while getopts ':hdos:' option; do
     case "$option" in
-        h) echo "$usage"
-           exit
-           ;;
+        h)  echo "$usage"
+            exit
+        ;;
+        d) debug=true ;;
+        o)  shift
+            OUTPUT=$1
+        ;;
     esac
 done
 
@@ -21,14 +25,16 @@ read -r -d '' INPUT << EOM
 EOM
 
 # output file
-[[ $1 ]] && OUTPUT=$1 || OUTPUT="BenjaminDoran_MotifPaper.docx"
+[[ $OUTPUT ]] || OUTPUT="BenjaminDoranMotifPaper.docx"
 
 # flags and style
 read -r -d '' FLAGS << EOM
---smart --standalone 
--V geometry:margin=1in 
---reference-docx=./template/custom-reference.docx
+--standalone -f markdown -V geometry:margin=1in 
+--reference-doc=./template/custom-reference
 EOM
+[[ $(echo $OUTPUT | grep -o '[^\.]\+$') == 'tex' ]] && FLAGS=$FLAGS.tex
+[[ $(echo $OUTPUT | grep -o '[^\.]\+$') == 'docx' ]] && FLAGS=$FLAGS.docx
+
 
 # Citation settings
 read -r -d '' REFERENCE << EOM
@@ -38,4 +44,5 @@ read -r -d '' REFERENCE << EOM
 EOM
 
 # make paper
-pandoc $REFERENCE $INPUT $FLAGS -o $OUTPUT
+[[ $debug ]] && echo "/usr/bin/pandoc $REFERENCE $INPUT $FLAGS -o $OUTPUT"
+/usr/bin/pandoc $REFERENCE $INPUT $FLAGS -o $OUTPUT

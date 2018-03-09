@@ -10,7 +10,7 @@ Biological motifs are short conserved degenerate sequences of similar or identic
 Biologic Motifs have a rather general definition and much like the grouping of genes may serve many functions. As a general rule, motifs are short often 8-30bp (base pairs) long [@das_survey_2007]. In the genome, among other roles, they may serve as transcription factor binding sites (TFBS), such as in the lac operon or the TATA box.[@hannenhalli_eukaryotic_2008]. Finding these biologic motifs is useful for categorizing genes and proteins, and assists in furthering our understanding of how to regulate gene expression and protein formation. Research into motif discovery aids in the development of new treatments and cures for a host of human diseases. 
 
 ### Representation
-Motif models are most commonly represented as a "point frequency matrix" (PFM) [cite pfm]. In PFMs each row is labeled by a base nucleotide, in the case of DNA from the set (A, C, G, T), and the columns indicate the aligned sequences positions. Each cell in the matrix is then calculated as the number of bases of its row type at that position. For instance, given these generated sequences:
+Motif models are most commonly represented as a "point frequency matrix" (PFM) [@hung_motif_2017]. In PFMs each row is labeled by a base nucleotide, in the case of DNA from the set (A, C, G, T), and the columns indicate the aligned sequences positions. Each cell in the matrix is then calculated as the number of bases of its row type at that position. For instance, given these generated sequences:
 
 ```
 1 CCCCT TAACC 10
@@ -105,10 +105,17 @@ From various surveys and comparisons, it appears that current motif finding algo
 
 In no particular order these challenges include:
 
-- **Robustness to noise:** As mentioned in regards to our lack of understanding of the background sequences surrounding these motifs, it is often difficult to separate the true motifs from spurious motifs that arise in the data from random chance. This also relates to the extreme difference in signal to noise ratio, trying to rind a 8-30bp motif in many sequences over 1000bp long.
-- **Ability to handle to different sized motifs:** As seen in both the combinatoric and probabilistic algorithms, we often need to decide what length of motif we would like to search for prior to starting our search. This is a significant issue since we usually don't know how long the motif should be. This requires that we run the algorithm multiple times, increasing both the runtime and the number of results we must sift through at the end. 
-- **Efficiency with increasingly large sequences:** A continual issue, most motif finding algorithms grow exponentially with an increase in the length of sequences, and with increasing affordability to sequence large sections of the genome [@heather_sequence_2016] algorithmic efficiency will be a pressing challenge.
-- **Simplicity of use:** Many motif finding algorithms possess numerous tuning parameters. These parameters can greatly increase effectiveness, but require an experts knowledge to actually use. This actually becomes a real problem in testing and comparing these algorithms [@tompa_assessing_2005; @sandve_improved_2007; @simcha_limits_2012; @hu_limitations_2005] as no individual or small team can be an expert in all of the available algorithms. Simplifying existing algorithms or developing a new simplified algorithm could reduce some of the uncertainty in algorithm comparisons as well as assist with motif finding in practice.
+**Robustness to noise:**  
+ As mentioned in regards to our lack of understanding of the background sequences surrounding these motifs, it is often difficult to separate the true motifs from spurious motifs that arise in the data from random chance. This also relates to the extreme difference in signal to noise ratio, trying to rind a 8-30bp motif in many sequences over 1000bp long.
+
+**Ability to handle to different sized motifs:**  
+ As seen in both the combinatoric and probabilistic algorithms, we often need to decide what length of motif we would like to search for prior to starting our search. This is a significant issue since we usually don't know how long the motif should be. This requires that we run the algorithm multiple times, increasing both the runtime and the number of results we must sift through at the end. 
+
+**Efficiency with increasingly large sequences:**  
+ A continual issue, most motif finding algorithms grow exponentially with an increase in the length of sequences, and with the lowering cost to sequence large sections of the genome [@heather_sequence_2016] algorithmic efficiency will be a pressing challenge.
+
+**Simplicity of use:**  
+Many motif finding algorithms possess numerous tuning parameters. These parameters can greatly increase effectiveness, but require an experts knowledge to actually use. This actually becomes a real problem in testing and comparing these algorithms [@tompa_assessing_2005; @sandve_improved_2007; @simcha_limits_2012; @hu_limitations_2005] as no individual or small team can be an expert in all of the available algorithms. Simplifying existing algorithms or developing a new simplified algorithm could reduce some of the uncertainty in algorithm comparisons as well as assist with motif finding in practice.
 
 Solutions or improvements to any of these issues would count as a success to motif discovery research. 
 
