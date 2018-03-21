@@ -1,6 +1,6 @@
 # Methodology
 
-In this section We will explain SkinnyDip's function as well as its underlying components, and detail what steps we took to apply this family of algorithms to the problem of motif discovery.
+In this section We will explain UniDip and SkinnyDip's function as well as their underlying components. And, we will detail what steps we took to apply this family of algorithms to the problem of motif discovery.
 
 ## How SkinnyDip Functions
 
@@ -15,13 +15,13 @@ In more detail, Hartigan's dip-test makes use of a distribution's empirical cumu
 
 The dip-test performs a best fit to this shape, finding an minimal width path such that, from left to right on the `x` axis, in the beginning the gradient only increases until it reaches a point where-after the gradient only decreases. The dip statistic is defined as the width of this path divided by two, and does not vary with shifting or scaling.
 
-Upon return of this dip statistic we may compare against a suitable unimodal null distribution, Hartigan suggests that the Uniform distribution is preferred [@hartigan_dip_1985], to obtain a p-value. If the p-value is greater than `alpha` we accept the null hypothesis that the distribution is unimodal, otherwise we accept the alternative that the distribution is _at least_ bi-modal.
+Upon return of this dip statistic we may compare against a suitable unimodal null distribution, Hartigan suggests that, to obtain a p-value, the Uniform distribution is preferred [@hartigan_dip_1985]. If the p-value is greater than `alpha` we accept the null hypothesis that the distribution is unimodal, otherwise we accept the alternative that the distribution is _at least_ bi-modal.
 
-The dip statistic and p-value are not enough in themselves to help us locate peaks. Thankfully, the dip-test also provides a modal interval, which specifies a lower and upper index to the isolated cluster.
+The dip statistic and p-value are not enough in themselves to help us locate peaks. However, the dip-test also provides a modal interval, which specifies a lower and upper index to the isolated cluster. From this four pieces of information we can begin to search a univariate dataset.
 
 ### UniDip, Recursive Application of the Dip Test
 
-UniDip takes us the next step by allowing us to recursively find peaks. Roughly speaking, we start by dipping along the entire single dimensional set of data. If the data is unimodal than we should return the set of data as the modal interval. otherwise we should perform UniDip within our located modal interval. If our left most modal interval appended to the rest of the data to the left is at least bimodal we should recurse to the left. similarly we should recurse right if the right most interval appended to the right data is bi-modal.
+UniDip takes us the next step by allowing us to recursively search a data sample to find peaks of density. We start by dipping along the entire single dimensional set of data. If the data is unimodal than we should return the set of data as the modal interval. otherwise we should perform UniDip within our located modal interval. If our left most modal interval appended to the rest of the data to the left is at least bimodal we should recurse to the left. similarly we should recurse right if the right most interval appended to the right data is bi-modal.
 
 UniDip in condensed pseudo-code:
 
@@ -57,7 +57,7 @@ UniDip(X, alpha=0.05, gamma=True)
     return Mm & Ml & Mu
 ```
 
-At the end of running this algorithm we obtain the union of the all our recursive steps. We may need to merge any touching intervals, but none will overlap.
+At the end of running this algorithm we collect the union of the all our recursive steps. We may need to merge any touching intervals, but none will overlap.
 
 ### SkinnyDip Recursive Application of UniDip
 
@@ -70,7 +70,7 @@ for each dimension
          get SkinnyDip hyperinterval from subsequent dimension
 return hyperintervals
 ```
-We recursively run UniDip on each dimension, and in the event that we find clusters we check the other dimensions to find intersections. In 2 dimensions our intersections or "hyperintervals" will be squares, in 3 they will be cubes. Maurus and Plant included in their paper a method to extract more useful projections of the data[@maurus_skinny-dip:_2016], but it is beyond the scope of this project. Indeed this multi-variate layer of SkinnyDip may even be beyond the scope of this project. While motif discovery starts with data in the form of many 1000bp long genomic sequences, our aim is to measure the level of nucleotide conservation, a potentially univariate metric. We have seen already representations such as frequency and information content measure conservation, distilling those representations down to a single metric or score will allow us to isolate motifs with the univariate UniDip algorithm.
+We recursively run UniDip on each dimension, and, in the event that we find clusters, we check the subsequent dimensions to determine intersections. In 2 dimensions our intersections or "hyperintervals" will be squares, in 3 dimensions they will be cubes. Maurus and Plant included in their paper a method to extract more useful projections of the data [@maurus_skinny-dip:_2016], but it is beyond the scope of this project. Indeed this multi-variate layer of SkinnyDip is beyond the scope of this project. While motif discovery starts with data in the form of many 1000bp long genomic sequences, our aim is to measure the level of nucleotide conservation, a potentially univariate metric. We have seen already representations such as frequency and information content measure conservation, distilling those representations down to a single metric or score will allow us to isolate motifs with the univariate UniDip algorithm.
 
 ### Implementing the Basic UniDip Algorithm
 
