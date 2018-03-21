@@ -1,14 +1,9 @@
 
 # Evaluation
 
-## Performence on Uniform Sequences
+## Case Study with ATF7 Transcription Factor Binding Site
 
-> TODO
+Utilizing the Gene Transcription Regulation Database and JASPER database [cite GTRD; JASPER] we have located 51 gens co-regulated by the transcription factor ATF7. We then retrieved locus information from the Ensemble database, before retrieving the 1000bp upstream sequences from the GCR38 human genome assembly in NCBI. 
 
-## Performence on Markov Sequences
+> TODO 
 
-> TODO
-
-## Performence on Real Sequences
-
-> TODO

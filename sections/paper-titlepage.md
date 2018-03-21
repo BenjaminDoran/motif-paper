@@ -1,6 +1,6 @@
 ---
 title: Unimodality Based Clustering Applied to Biological Motif Discovery
-date: "Publish Date: February 2018"
+date: "Date: March 19, 2018"
 link-citations: true
 header-includes:
     - \usepackage(amsmath)

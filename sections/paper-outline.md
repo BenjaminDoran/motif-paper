@@ -21,27 +21,22 @@ Purpose: outline ~30 page INDR report
 	- Current Limits
 		- Benchmark Evaluation
 		- Limits 
-- Background
 	- Potential Application of SkinnyDip
 		- answers a lot of the current limits
+- Methodology
 	- How does SkinnyDip work?
 		- Hartigan Dip test
 		- Unidip, recursion
 		- Skinnydip, recursion of Unidip
-	- Challenges of Applying Skinnydip
-- Methodology
 	- Applied to Histograms
 		- porting to python
 		- pvals
-	- Applied to PFMs
-	- Applied to PSSMs
+	- Applied to Symbolic data
 	- Applied to Degenerate Motifs
 	- Applied to Alignments
 	- Filtering Out Spurious Motifs
 - Evaluation
-	- Performence on Uniform Sequences
-	- Performence on Markov Sequences
-	- Performence on Real Sequences
+	- Case Study of ABI3 TFBS
 - Summary and Conclusions
 	- Acknowledgments 
 - Bibliography
