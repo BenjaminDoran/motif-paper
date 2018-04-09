@@ -6,7 +6,7 @@ In this section we will define what we mean by biologic motifs, and discuss thei
 
 ### Definition and Role
 
-Biological motifs are short conserved degenerate sequences of similar or identical sequence instances as found in DNA sequences. One common type of biologic motif is the transcription factor binding site (TFBS), which will be the primary focus of this research paper. TFBSs serve as regulation sites inhibiting or promoting the transcription of certain genes. As a general rule, TFBSs are short often 8-30bp (base pairs) long [@das_survey_2007]. Examples of well studied TFBSs are the lac operon and the TATA box.[@hannenhalli_eukaryotic_2008]. To discover new TFBSs, upstream sequences usually 1000bp long are collected from co-regulated genes either within or across species, and compared to find conserved regions. Because individual sequences may vary slightly due to non-harmful mutations, when looking for motifs we are not looking for exact matches or sequences. Instead, we model an idealized sequence that takes into account probable mutations. This model is the TFBS motif.
+Biological motifs are short conserved degenerate sequences of similar or identical sequence instances as found in DNA sequences. One common type of biologic motif is the transcription factor binding site (TFBS), which will be the primary focus of this research paper. TFBS's serve as regulation sites inhibiting or promoting the transcription of certain genes. As a general rule, TFBS's are short often 8-30bp (base pairs) long [@das_survey_2007]. Examples of well studied TFBS's are the lac operon and the TATA box.[@hannenhalli_eukaryotic_2008]. To discover new TFBS's, upstream sequences usually 1000bp long are collected from co-regulated genes either within or across species, and compared to find conserved regions. Because individual sequences may vary slightly due to non-harmful mutations, when looking for motifs we are not looking for exact matches or sequences. Instead, we model an idealized sequence that takes into account probable mutations. This model is the TFBS motif.
 
 ### Representation and Visualization
 
@@ -56,7 +56,7 @@ Sequence logos are the primary method of visualizing biologic motifs [@hung_moti
 
 ### Profile Analysis
 
-So far we have explored what motifs are, but we have yet to explain how they are discovered. In the simplest cases this can be done mostly manually, in a process called profile analysis [@hannenhalli_eukaryotic_2008]. If searching for TFBSs, The biologist gathers samples of the upstream region of genes known to be co-regulated, and performs a local multi-alignment using BLAST [@ncbiresourcecoordinators_database_2017] or similar tool. The produced alignments can be filtered based on their information content scores, and PFMs are generated from the highest scoring results.
+So far we have explored what motifs are, but we have yet to explain how they are discovered. In the simplest cases this can be done mostly manually, in a process called profile analysis [@hannenhalli_eukaryotic_2008]. If searching for TFBS's, The biologist gathers samples of the upstream region of genes known to be co-regulated, and performs a local multi-alignment using BLAST [@ncbiresourcecoordinators_database_2017] or similar tool. The produced alignments can be filtered based on their information content scores, and PFMs are generated from the highest scoring results.
 
 Profile analysis requires large amounts of prior knowledge and human judgment, which is inconsistent at the best of times. This analysis can also struggle with instances that are less than reasonably similar. This analysis is also slow, running at human speed. More robust and batch process-like tools are needed to keep pace with the scale of data new sequencing techniques are now producing.
 
@@ -96,13 +96,13 @@ From various surveys and comparisons, it appears that current motif finding algo
 In no particular order these challenges include:
 
 **Robustness to noise:**  
- As mentioned in regards to our lack of understanding of the background sequences surrounding these motifs, it is often difficult to separate the true motifs from spurious motifs that arise in the data from random chance. This also relates to the extreme difference in signal to noise ratio, trying to rind a 8-30bp motif in many sequences over 1000bp long.
+As mentioned in regards to our lack of understanding of the background sequences surrounding these motifs, it is often difficult to separate the true motifs from spurious motifs that arise in the data from random chance. This also relates to the extreme difference in signal to noise ratio, trying to rind a 8-30bp motif in many sequences over 1000bp long.
 
 **Ability to handle to different sized motifs:**  
- As seen in both the combinatoric and probabilistic algorithms, we often need to decide what length of motif we would like to search for prior to starting our search. This is a significant issue since we usually don't know how long the motif should be. This requires that we run the algorithm multiple times, increasing both the runtime and the number of results we must sift through at the end.
+As seen in both the combinatoric and probabilistic algorithms, we often need to decide what length of motif we would like to search for prior to starting our search. This is a significant issue since we usually don't know how long the motif should be. This requires that we run the algorithm multiple times, increasing both the runtime and the number of results we must sift through at the end.
 
 **Efficiency with increasingly large sequences:**  
- A continual issue, most motif finding algorithms grow exponentially with an increase in the length of sequences, and with the lowering cost to sequence large sections of the genome [@heather_sequence_2016] algorithmic efficiency will be a pressing challenge.
+A continual issue, most motif finding algorithms grow exponentially with an increase in the length of sequences, and with the lowering cost to sequence large sections of the genome [@heather_sequence_2016] algorithmic efficiency will be a pressing challenge.
 
 **Simplicity of use:**  
 Many motif finding algorithms possess numerous tuning parameters. These parameters can greatly increase effectiveness, but require an experts knowledge to actually use. This actually becomes a real problem in testing and comparing these algorithms [@tompa_assessing_2005; @sandve_improved_2007; @simcha_limits_2012; @hu_limitations_2005] as no individual or small team can be an expert in all of the available algorithms. Simplifying existing algorithms or developing a new simplified algorithm could reduce some of the uncertainty in algorithm comparisons as well as assist with motif finding in practice.
