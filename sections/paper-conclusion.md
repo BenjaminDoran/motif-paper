@@ -1,4 +1,6 @@
 
 # Conclusion and Further Research
 
-> TODO
+We have found that UniDip beneficial both directly and indirectly to the problem of motif discovery. Directly UniDip is able to isolate multi-letter degenerate motifs in symbolic data provided the motif instances are aligned. Indirectly, and in conjunction with global alignment tools, UniDip is able to detect regions of higher conservation with greater concentrations of motif instances. This detection allows us to better focus our search with other motif discovery tools, saving considerable time. UniDip and its use of the Hartigan dip-test provides a new way of thinking about the problem of motif discovery. It is clearly not perfect, but it does warrant further research. 
+
+Further research could continue in two directions. First it would be interesting to apply UniDip to sequences gathered upstream of the same gene among individuals of the same species. These are generally highly conserved regions, without much evolutionary time to differentiate, UniDip may be well suited to these regions since there has not been time for motifs to become highly misaligned. Second, we have so far only examined motif discovery as a univariate problem, it may be of more use to understand the problem as multi-dimensional with each sample sequence acting as its own vector. UniDip's extension SkinnyDip could be extremely useful to this understanding of the problem, and provide more accurate results.

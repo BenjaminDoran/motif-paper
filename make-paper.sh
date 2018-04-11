@@ -1,4 +1,4 @@
-usage="$(basename "$0") [-h] [-o outputFile] [-t outputFormat] -- Builds Motif Paper"
+usage="$(basename "$0") [-h] [-o outputFile] -- Builds Motif Paper"
 while getopts ':hdos:' option; do
     case "$option" in
         h)  echo "$usage"
@@ -40,6 +40,7 @@ read -r -d '' REFERENCE << EOM
 --bibliography ./reference/Motif.bib 
 --filter pandoc-citeproc 
 --csl=./reference/ieee.csl
+--css=./template/custom.css
 EOM
 
 # make paper

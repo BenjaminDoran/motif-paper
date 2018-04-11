@@ -1,5 +1,5 @@
 
-# Suplementary Materials
+# Supplementary Materials
 
 **UniDip implementation**:
 [https://github.com/BenjaminDoran/unidip](https://github.com/BenjaminDoran/unidip)
@@ -7,7 +7,7 @@
 **Tests**:
 > TO PUBLISH
 
-**ATF7 Retriaval Script**:
+**FOXK1 Retrieval Script**:
 > TO PUBLISH
 
 # References
