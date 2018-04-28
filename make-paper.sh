@@ -17,6 +17,7 @@ read -r -d '' INPUT << EOM
 ./sections/paper-titlepage.md 
 ./sections/paper-abstract.md 
 ./sections/paper-intro.md 
+./sections/paper-dip.md 
 ./sections/paper-methodology.md 
 ./sections/paper-evaluation.md 
 ./sections/paper-conclusion.md 
