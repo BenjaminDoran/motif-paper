@@ -9,6 +9,7 @@ The UniDip algorithm is able to find clusters in univariate continuous numeric d
 Hartigan's dip-test makes use of a distribution's empirical cumulative distribution function (ECDF). As can be seen from the plot below, this function's gradient increases approaching a peak in the histogram, and decreases after. In unimodal data, this creates a stretched S shape.
 
 ![](./imgs/1PeakWithECDF.png)
+
 ![](./imgs/3PeakWithECDF.png)
 
 The dip-test performs a best fit to this shape, finding an minimal width path such that, from left to right on the `x` axis, the gradient only increases until it reaches a point where-after the gradient only decreases. The dip statistic is defined as the width of this path divided by two, and does not vary with shifting or scaling.

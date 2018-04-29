@@ -39,42 +39,42 @@ Sequence logos are the primary method of visualizing biologic motifs [@hung_moti
 
 Generating motif logos and PFMs make a large assumption that the sequences will be aligned. MFAs and tools cannot make this assumption because more often in genomic sequences the instances of a motif will not be perfectly aligned. Biologists thus use a range of sampling and alignment of the raw sequences to find motifs. Current motif finding approaches can generally be split into three branches as listed below:
 
-- **Profile Analysis**  
+**Profile Analysis**  
 TFBS's are generally searched for by selecting a 1000bp upstream sequence from co-regulated genes. These may be different genes all within the same individual, or the same gene across species. For individual cases, analysis can be performed mostly manually in a process called profile analysis [@hannenhalli_eukaryotic_2008]. The biologist performs a multi-sequence local alignment using BLAST [@ncbiresourcecoordinators_database_2017] or similar tool. The produced alignments can be filtered based on their information content scores, and PFMs are generated from the highest scoring results. Profile analysis requires human observation at nearly every stage of the process, thus for large batches of cases, more complete MFAs are used. 
 
-- **Combinatoric algorithms**  
+**Combinatoric algorithms**  
 The combinatoric family of motif discovery algorithms uses enumeration to solve for the problem of how likely it is to find a specific pattern $p$ of length $l$ with $m$ mutations among sequences $n$ long. These methods are related to the brute force approach of checking every possible sub-sting in the data, but use various tricks to reduce runtime, for example equating this brute force example to the median string problem [@jones_introduction_2004]. These algorithms, such as WEEDER and PSMILE [@pavesi_algorithm_2001; @carvalho_efficient_2004], are exhaustive, meaning that they will find a globally optimal solution given the data. Combinatoric algorithms in particular are known to struggle with longer motifs with high variability, and must deal with an exponentially growing search-space, which is to say that they are extremely effective at finding shorter motifs, so long as the underlying sequence does not become too long.
 
-- **Probabilistic Algorithms**  
-    The other is common grouping of MFAs, are the probabilistic algorithms, of which the expectation maximization algorithms take up a large portion [@das_survey_2007]. In pseudo-code we can see the general steps of the expectation maximization algorithm
+**Probabilistic Algorithms**  
+The other is common grouping of MFAs, are the probabilistic algorithms, of which the expectation maximization algorithms take up a large portion [@das_survey_2007]. In pseudo-code we can see the general steps of the expectation maximization algorithm
 
-    ```pseudocode
-    decide length of motif we would like to find
-    choose random starting points in sequences
-    do:
-        generate PFM from starting points + decided length
-        score every sub-string in sequence against PFM
-        from top scoring sub-strings:
-            update starting points
-    until scores stop increasing
-    ```
+```pseudocode
+decide length of motif we would like to find
+choose random starting points in sequences
+do:
+    generate PFM from starting points + decided length
+    score every sub-string in sequence against PFM
+    from top scoring sub-strings:
+        update starting points
+until scores stop increasing
+```
 
-    This process is remarkably effective, particularly with improvements to deciding where to initially set the starting points such as with Gibb's sampling [@das_survey_2007]. It should be noted that these methods implement a large amount of randomness, meaning that these probabilistic algorithms are apt to find a local optimum in their search. Biologists often run these algorithms multiple times, to increase the chances of finding the global optimum, but this takes increasing time with the length of the sequences. Despite these drawbacks, probabilistic algorithms are especially good at finding longer motifs with high variability.
+This process is remarkably effective, particularly with improvements to deciding where to initially set the starting points such as with Gibb's sampling [@das_survey_2007]. It should be noted that these methods implement a large amount of randomness, meaning that these probabilistic algorithms are apt to find a local optimum in their search. Biologists often run these algorithms multiple times, to increase the chances of finding the global optimum, but this takes increasing time with the length of the sequences. Despite these drawbacks, probabilistic algorithms are especially good at finding longer motifs with high variability.
 
 By working on the raw sequences these three branches encounter certain common limitations in terms of memory use and speed. Aggregating data loses detail but can allow fast extraction of certain features. Various studies have benchmarked and tested the current MFAs and specified even more common challenges [@das_survey_2007; @tompa_assessing_2005; @sandve_improved_2007; @simcha_limits_2012; @hu_limitations_2005].
 
 These challenges include:
 
-- **Robustness to noise:**  
+**Robustness to noise:**  
 As mentioned in regards to our lack of understanding of the background sequences surrounding these motifs, it is often difficult to separate the true motifs from spurious motifs that arise in the data from random chance. This also relates to the extreme difference in signal to noise ratio, trying to rind a 8-30bp motif in many sequences over 1000bp long.
 
-- **Ability to handle to different sized motifs:**  
+**Ability to handle to different sized motifs:**  
 As seen in both the combinatoric and probabilistic algorithms, we often need to decide what length of motif we would like to search for prior to starting our search. This is a significant issue since we usually don't know how long the motif should be. This requires that we run the algorithm multiple times, increasing both the runtime and the number of results we must sift through at the end.
 
-- **Efficiency with increasingly large sequences:**  
+**Efficiency with increasingly large sequences:**  
 A continual issue, most MFAs grow exponentially with an increase in the length of sequences, and with the lowering cost to sequence large sections of the genome [@heather_sequence_2016] algorithmic efficiency will be a pressing challenge.
 
-- **Simplicity of use:**  
+**Simplicity of use:**  
 Many MFAs possess numerous tuning parameters. These parameters can greatly increase effectiveness, but require an experts knowledge to actually use. This actually becomes a real problem in testing and comparing these algorithms [@tompa_assessing_2005; @sandve_improved_2007; @simcha_limits_2012; @hu_limitations_2005] as no individual or small team can be an expert in all of the available algorithms. Simplifying existing algorithms or developing a new simplified algorithm could reduce some of the uncertainty in algorithm comparisons as well as assist with motif finding in practice.
 
 ## Potential Application of UniDip

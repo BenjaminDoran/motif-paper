@@ -21,6 +21,7 @@ In this image we plot a random sample of 500 points from a normal distribution, 
 The reason it is useful to generate an ECDF from histogram heights, is because thinking back to the sequence logos, we can find a lot of similarities to a histogram. Each position can be compared to a bin, with the height determined by the frequency or information content in that position.
 
 ![](./imgs/BitsLogo.png)
+
 ![](./imgs/HistLikeLogo.png)
 
 We can see the use in pushing histogram data through UniDip, but one assumption of the algorithm need to be changed for this type of data to be accepted. by default UniDip frequently sorts the data lowest to highest. This makes sense with a random sample where order is only determined by value and not position, and generating an ECDF from a raw sample requires sorted data, but with histogram data position is order and sorting by value will destroy that order.
@@ -29,7 +30,7 @@ This problem with sorting springs up in even more obscure parts of the algorithm
 
 ```pseudocode
 if unimodal
-    return if modal_interval ? (X[0], X[-1]) : (DIP[lower], DIP[upper]);
+    return (if isMod) ? (X[0], X[-1]) : (Mod[0], Mod[-1])
 ```
 
 However, we run into an issue when recursing to the left or right of the modal interval. If there is only one modal peak, following the pseudo code from above, we will return an interval cutting off a large portion of the peak's tails. The solution to expanding the modal interval that Maurus and Plant developed is to "mirror" the data, such that if our data is `[1, 2, 3]` the mirrored dataset is `[-2, -1, 0, 1, 2]`. What this means is that when we are recursing to the left or right and we know we have found a single peak, we will perform the dip test on a bimodal mirror-set of the data to extract the whole peak. 
@@ -103,6 +104,7 @@ This level of degeneracy is high for a motif, but a similar effect will be seen 
 UniDip is heavily reliant on the alignment of sequences to be able to measure nucleotide conservation. Even a misalignment of few nucleotides can obfuscate our entropy calculations. Thus, misaligning motifs is the largest challenge in applying UniDip to motif discovery. For reference, compare the below SNE plots that show data sets of 20 sequences, in one we have added a random +/-5bp misalignment the other has perfect alignment.
 
 ![](./imgs/maskedMotifMisaligned.png)
+
 ![](./imgs/maskedMotifAligned.png)
 
 This problem with misalignment could possibly be alleviated by increasing the amount of data. Once we have enough sequences the motifs overlap enough that we can detect the conservation. For 15bp motifs with mis-alignments of +/-5 adjacent positions, assuming uniform dispersion, we would expect a single perfect alignment after sampling 5 times and 10 samples before we could be assured of a single perfect alignment. This also means that the conservation would grow not just at a single motif site but at all the overlapped motif sites. For the 15bp motif, conservation would increase in a 25bp region. 
