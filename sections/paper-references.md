@@ -1,5 +1,6 @@
+# Citations & Materials
 
-# Supplementary Materials
+## Supplementary Materials
 
 **UniDip implementation**:
 [https://github.com/BenjaminDoran/unidip](https://github.com/BenjaminDoran/unidip)
@@ -10,5 +11,5 @@
 **FOXK1 Retrieval Script**:
 > TO PUBLISH
 
-# References
+## References
 <!-- References are auto generated -->

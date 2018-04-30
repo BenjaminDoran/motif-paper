@@ -1,10 +1,10 @@
 # Methodology
 
-If we would like to take UniDip to genomic data we will need to make modifications, both by transforming the data and in the algorithm itself. In this section we will detail what steps we took to apply the SKinnyDip family of algorithms to symbolic data.
+If we would like to take UniDip to genomic data we will need to make modifications, by both transforming the data and the algorithm itself. In this section we will detail what steps we took to apply the SkinnyDip family of algorithms to symbolic data.
 
 ## Applying to Histogram Data
 
-To start we will make some changes to the UniDip algorithm so that it can handle more discrete forms of data. The core of UniDip, Hartigan's dip-test, only requires access to the ECDF of the data. Thus, any data we would like to cluster must be reducible to an ECDF. An ECDF can be calculated either directly from the sample of a continuous random variable, or an approximation can be made from the `y` coordinates of the bins in a histogram.
+To start, we will make some changes to the UniDip algorithm so that it can work with more discrete forms of data. The core of UniDip, Hartigan's dip-test, only requires access to the ECDF of the data. Thus, any data we would like to cluster must be reducible to an ECDF. An ECDF can be calculated either directly from the sample of a continuous random variable, or an approximation can be made from the `y` coordinates of the bins in a histogram.
 
 **Sample from continuous random variable as X:**
 $$\text{ECDF } = X_1 ... X_n / max(X)$$
@@ -21,7 +21,6 @@ In this image we plot a random sample of 500 points from a normal distribution, 
 The reason it is useful to generate an ECDF from histogram heights, is because thinking back to the sequence logos, we can find a lot of similarities to a histogram. Each position can be compared to a bin, with the height determined by the frequency or information content in that position.
 
 ![](./imgs/BitsLogo.png)
-
 ![](./imgs/HistLikeLogo.png)
 
 We can see the use in pushing histogram data through UniDip, but one assumption of the algorithm need to be changed for this type of data to be accepted. by default UniDip frequently sorts the data lowest to highest. This makes sense with a random sample where order is only determined by value and not position, and generating an ECDF from a raw sample requires sorted data, but with histogram data position is order and sorting by value will destroy that order.
@@ -35,7 +34,7 @@ if unimodal
 
 However, we run into an issue when recursing to the left or right of the modal interval. If there is only one modal peak, following the pseudo code from above, we will return an interval cutting off a large portion of the peak's tails. The solution to expanding the modal interval that Maurus and Plant developed is to "mirror" the data, such that if our data is `[1, 2, 3]` the mirrored dataset is `[-2, -1, 0, 1, 2]`. What this means is that when we are recursing to the left or right and we know we have found a single peak, we will perform the dip test on a bimodal mirror-set of the data to extract the whole peak. 
 
-Data mirroring becomes a problem when applied to histogram data because the specific algorithm Maurus and Plant use sorts by value. To allow histogram data, We replaced this with own mirror function that flips the data by index rather than value. 
+Data mirroring becomes a problem when applied to histogram data because the specific mirroring algorithm Maurus and Plant use sorts by value. To allow histogram data, We replaced this with own mirror function that flips the data by index rather than value. 
 
 ```pseudocode
 if flip_left:
