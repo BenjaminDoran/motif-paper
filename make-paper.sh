@@ -30,6 +30,8 @@ EOM
 # flags and style
 read -r -d '' FLAGS << EOM
 --standalone -f markdown -V geometry:margin=1in 
+--mathjax
+--css=./template/custom.css
 --reference-doc=./template/custom-reference
 EOM
 [[ $(echo $OUTPUT | grep -o '[^\.]\+$') == 'tex' ]] && FLAGS=$FLAGS.tex
@@ -41,7 +43,6 @@ read -r -d '' REFERENCE << EOM
 --bibliography ./reference/Motif.bib 
 --filter pandoc-citeproc 
 --csl=./reference/ieee.csl
---css=./template/custom.css
 EOM
 
 # make paper

@@ -27,10 +27,10 @@ A basic count representation shows all positions as equally important. However, 
 Using Shannon's Information Theory and equations for Information Content and Expected Information, 
 
 **Information Content:**
-$$I(x_i) = -\log_2 \Big(P(x_i) \Big)$$
+$$I(x_i)=-\log_2\Big(P(x_i)\Big)$$
 
 **Expected Information:**
-$$H = \sum_{i = 1}^{n} P(x_i) I(x_i)$$
+$$H=\sum_{i=1}^{n}P(x_i)I(x_i)$$
 
 we can measure the level of conservation at each position individually by comparing the probabilities we would expect to an evenly distributed baseline ($1/4$ per base). These equations allow us to better weigh each position by how well conserved it is. We see in the logo above that positions with higher conservation can be visualized larger, making it much easier to locate the start and end sites of the motif at 3 and 8 respectively.
 
