@@ -5,8 +5,8 @@
 **UniDip implementation**:
 [https://github.com/BenjaminDoran/unidip](https://github.com/BenjaminDoran/unidip)
 
-**Tests**:
-> TO PUBLISH
+**UniDip Examples**:
+[https://github.com/BenjaminDoran/bio-unidip-examples](https://github.com/BenjaminDoran/bio-unidip-examples)
 
 **FOXK1 Retrieval Script**:
 > TO PUBLISH
