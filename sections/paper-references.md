@@ -9,7 +9,7 @@
 [https://github.com/BenjaminDoran/bio-unidip-examples](https://github.com/BenjaminDoran/bio-unidip-examples)
 
 **FOXK1 Retrieval Script**:
-> TO PUBLISH
+[https://github.com/BenjaminDoran/Motif-Dataset](https://github.com/BenjaminDoran/Motif-Dataset)
 
 ## References
 <!-- References are auto generated -->
