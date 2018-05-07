@@ -8,7 +8,7 @@ Hartigan's dip-test makes use of a distribution's empirical cumulative distribut
 
 ![](./imgs/1PeakWithECDF.png)
 
-![](./imgs/3PeakWithECDF.png)
+![Fig. 2: Histogram and ECDF for one and three peak distributions](./imgs/3PeakWithECDF.png)
 
 The dip-test performs a best fit to this shape, finding an minimal width path such that, from left to right on the `x` axis, the gradient only increases until it reaches a point where-after the gradient only decreases. The dip statistic is defined as the width of this path divided by two, and does not vary with shifting or scaling.
 
