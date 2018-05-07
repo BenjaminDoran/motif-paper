@@ -61,13 +61,13 @@ $$H= -\sum_{i=a}^{t} P(x_i) \log_2(P(x_i))$$
 
 Applying an entropy calculation column-wise along the sequence will allows measurement of general conservation non-specific to any particular nucleotide. But, entropy by itself is not well suited to UniDip. Looking at the individual information content in *Fig. 6*, we see that higher scores actually correspond to less frequency. This makes sense because a sequence that is always a single symbol cannot convey any information. 
 
-However, to measure conservation, we would like to invert the Y axis and scale to above 0. This transformation is important for two reasons. First, inverting and scaling makes thinking about conservation easier, making higher scores indicate higher conservation. Second, inverting and scaling makes the metric conform to the format of histogram data that we have already shown interfaces well with UniDip. Following the example set by motif logos, we invert the Y axis and scale in one step by subtracting the positional entropy from the maximum score possible with four possible nucleotides $2-H(X)$. After this transformation, we can visualize our simple sequence as scaled negative entropy (SNE).
+However, to measure conservation, we would like to invert the Y axis and scale to above 0. This transformation is important for two reasons. First, inverting and scaling makes thinking about conservation easier, making higher scores indicate higher conservation. Second, inverting and scaling makes the metric conform to the format of histogram data that we have already shown interfaces well with UniDip. Following the example set by motif logos, we invert the Y axis and scale in one step by subtracting the positional entropy from the maximum score possible with four possible nucleotides $2-H(X)$. After this transformation, we can visualize the simple sequence as scaled negative entropy (SNE).
 
 ![Fig 7: Scaled Negative Entropy (SNE)](./imgs/polyANegEnt.png)
 
-We can see our metric shows a high peak in the region of the poly-A motif, indicating its conservation. The surrounding regions vary with each position, but are nowhere near the height of our generated motif.
+We can see the  metric shows a high peak in the region of the poly-A motif, indicating its conservation. The surrounding regions vary with each position, but are nowhere near the height of the generated motif.
 
-By default, with unimodal data, UniDip would return all our data as a single cluster. We can make another change to the algorithm, so that, in the event that we return a single cluster, we subsequently perform data mirroring to isolate the single region of highest conservation.
+By default, with unimodal data, UniDip would return all the data as a single cluster. We can make another change to the algorithm, so that, in the event that we return a single cluster, we subsequently perform data mirroring to isolate the single region of highest conservation.
 
 ![Fig. 8: UniDip clustering on symbolic data](./imgs/polyACluster.png)
 
@@ -83,7 +83,7 @@ It is only when looking at the individual metrics that the difference is clear.
 
 ![](./imgs/MultiLet01.png)
 
-This consistency of our metric shows why it is important to have this grouped single metric. While the conservation of each nucleotide varies wildly, the combined conservation shows clearly where our motif is positioned. UniDip is completely able to handle multi-symbol motifs as represented with SNE.
+This consistency of SNE shows why it is important to have this grouped univariate metric. While the conservation of each nucleotide varies wildly, the combined conservation shows clearly where the motif is positioned. UniDip is completely able to handle multi-symbol motifs as represented with SNE.
 
 ![](./imgs/MultiLet03.png)
 
@@ -101,7 +101,7 @@ This level of degeneracy is high for a motif, but a similar effect will be seen 
 
 ## Applying to Differently Aligned Motifs
 
-Due to how SNE is calculated, UniDip is heavily reliant on the alignment of sequences to be able to measure nucleotide conservation. Even a misalignment of few nucleotides can obfuscate our entropy calculations. Thus, misaligning motifs is the largest challenge in applying UniDip to motif discovery. For reference, compare the below SNE plots that show data sets of 20 sequences, in one we have added a random +/-5bp misalignment the other has perfect alignment.
+Due to how SNE is calculated, UniDip is heavily reliant on the alignment of sequences to be able to measure nucleotide conservation. Even a misalignment of few nucleotides can obfuscate the entropy calculations. Thus, misaligning motifs is the largest challenge in applying UniDip to motif discovery. For reference, compare the below SNE plots that show data sets of 20 sequences, in one we have added a random +/-5bp misalignment the other has perfect alignment.
 
 ![](./imgs/maskedMotifMisaligned.png)
 
@@ -115,15 +115,15 @@ Global alignment tools can reduce this number of required samples. The MUSCLE al
 
 Regarding the introduction of gaps the complications arise from needing to handle a new symbol "-" indicating an insertion. It is not immediately clear how to count this insertion. If "-" is counted like any letter there will be large sections of perfect conservation, which will mask the signals of true conservation. However, there are equally large problems if "-" is automatically set to $0$. Remembering that entropy calculations divide by the counts of each base, having sections of $0$ could lead to division errors. Instead, for any insertion we add a tally to all other bases, this has the effect where positions with many insertions have their conservation level lowered as the counts of bases at that position become more similar. 
 
-So, is this tallying method enough to be able to effectively handle misalignments? Generating 20 sample sequences with a motif at a random misalignment of +/-10bp we see that a high peak where our motifs have been aligned. After, running UniDip on this data, though, there is another issue. UniDip is now clustering not just the motif but all alignments as well. This is because there are now three levels of conservation, the gaps, the background sequence, and the motif. UniDip is unable to find nested clusters, where there are multiple steps of density. 
+So, is this tallying method enough to be able to effectively handle misalignments? Generating 20 sample sequences with a motif at a random misalignment of +/-10bp we see that a high peak where the motifs have been aligned. After, running UniDip on this data, though, there is another issue. UniDip is now clustering not just the motif but all alignments as well. This is because there are now three levels of conservation, the gaps, the background sequence, and the motif. UniDip is unable to find nested clusters, where there are multiple steps of density. 
 
 ![](./imgs/GappedAlignedClustered.png)
 
-Trimming the gaps from our data overcomes this limitation. The gaps are at a relatively even level less than 0.1 SNE. By filtering and concatenating only regions that are greater than that threshold UniDip is able to correctly isolate just the conserved motif once again.
+Trimming the gaps from the data overcomes this limitation. The gaps are at a relatively even level less than 0.1 SNE. By filtering and concatenating only regions that are greater than that threshold UniDip is able to correctly isolate just the conserved motif once again.
 
 ![](./imgs/UnGappedAlignedClustered.png)
 
-Removing these gaps might present a problem for being able to map back to the original sequence instances, but by keeping track of the aligned indices while performing the filtering we are able to maintain our ability to map back to the original instances.
+Removing these gaps might present a problem for being able to map back to the original sequence instances, but by keeping track of the aligned indices while performing the filtering we are able to maintain the ability to map back to the original instances.
 
 ## Methodology Summary
 
