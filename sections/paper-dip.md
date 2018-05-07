@@ -71,7 +71,7 @@ for each dimension
          get SkinnyDip hyperinterval from subsequent dimensions
 return hyperintervals
 ```
-SKinnyDip recursively runs UniDip across each dimension, and, in the event that it finds clusters, SKinnyDip checks the subsequent dimensions to determine intersections. In two dimensions the intersections or "hyper-intervals" will be squares, in three dimensions they will be cubes. 
+SkinnyDip recursively runs UniDip across each dimension, and, in the event that it finds clusters, SkinnyDip checks the subsequent dimensions to determine intersections. In two dimensions the intersections or "hyper-intervals" will be squares, in three dimensions they will be cubes. 
 
 While motif discovery starts with data in the form of many 1000bp long genomic sequences, the aim is to measure the level of nucleotide conservation, an inherently univariate metric. In the motif logos and PFMs, representations such as frequency and information content measure conservation as a function of each nucleotide. Distilling those representations down to a single function of position allows the isolation of conserved regions with the univariate UniDip algorithm.
 
