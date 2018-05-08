@@ -122,7 +122,7 @@ So, is this tallying method enough to be able to effectively handle misalignment
 
 Trimming the gaps from the data overcomes this limitation. The gaps are at a relatively even level less than 0.1 SNE. By filtering and concatenating only regions that are greater than that threshold, UniDip is able to correctly isolate just the conserved motif once again.
 
-![Fig. 15: UniDip clustering on aligned and trimmed sequences](./imgs/UnGappedAlignedClustered.png)
+![Fig. 16: UniDip clustering on aligned and trimmed sequences](./imgs/UnGappedAlignedClustered.png)
 
 Removing these gaps might present a problem for being able to map back to the original sequence instances, but by keeping track of the aligned indices while performing the filtering we are able to maintain the ability to map back to the original instances.
 
