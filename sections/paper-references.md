@@ -8,7 +8,7 @@
 **UniDip Examples**:
 [https://github.com/BenjaminDoran/bio-unidip-examples](https://github.com/BenjaminDoran/bio-unidip-examples)
 
-**FOXK1 Retrieval Script**:
+**FOXK1 TFBS Retrieval Script**:
 [https://github.com/BenjaminDoran/Motif-Dataset](https://github.com/BenjaminDoran/Motif-Dataset)
 
 ## References
