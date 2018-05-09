@@ -1,0 +1,387 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Unimodality Based Clustering Applied to Biological Motif Discovery</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="./template/custom.css" type="text/css" />
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+</head>
+<body>
+<div id="header">
+<h1 class="title">Unimodality Based Clustering Applied to Biological Motif Discovery</h1>
+<h3 class="date">Date: May 9, 2018</h3>
+</div>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"><strong>Researcher:</strong></th>
+<th align="left"><strong>Research Reviewer:</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Benjamin Doran</td>
+<td align="left">Hatch Whitfield</td>
+</tr>
+<tr class="even">
+<td align="left">Harvard University</td>
+<td align="left">Harvard University</td>
+</tr>
+<tr class="odd">
+<td align="left">Department of Continuing Education</td>
+<td align="left">Department of Continuing Education</td>
+</tr>
+</tbody>
+</table>
+<h1 id="abstract">Abstract</h1>
+<h2 id="motivation">Motivation</h2>
+<p>Common motif finding algorithms work directly on raw sequences. This focus has advantages and disadvantages. Working with raw sequences does give more detail and is more grounded to the core of genomic data, but it limits the number of available algorithms. Current motif finding algorithms struggle with speed, underlying randomness, and high noise environments. The UniDip algorithm, developed outside the field of biology, is fast, deterministic, and noise robust. Levering these strengths, UniDip will be a powerful addition to sequence analysis of symbolic genomic data.</p>
+<h2 id="results">Results</h2>
+<p>Inspired by the representation of biologic motifs in motif logos, we present a method to measure the conservation level of aligned sequences providing a numerical representation accessible to the UniDip algorithm. This metric is based on Shannon's information content and entropy formulas. We show that UniDip is able to take this numeric representation to isolate the regions of high conservation in simulated sequences, working on degenerate motifs with up to 55% mutation. We also show a case study isolating the transcription factor binding site of FOXK1. UniDip serves as a powerful processing tool that is able to trim out low conservation regions, shrinking the search space for conventional motif finding algorithms. With MEME, we are able to find the FOXK1 transcription factor binding site 70% faster preprocessing with UniDip versus running MEME directly on raw sequences.</p>
+<h1 id="introduction">Introduction</h1>
+<p>This section describes biologic motif's common representations, including point frequency matrices and motif logos. It details the current state of research into motif finding algorithms (MFAs), touching on profile analysis, combinatoric algorithms, and probabilistic algorithms. It will reference the current challenges faced in the field of motif discovery <span class="citation">[<a href="#ref-das_survey_2007">1</a>]–[<a href="#ref-hu_limitations_2005">5</a>]</span>, and finishes by introducing the recently developed UniDip algorithm that has the potential to address many of these challenges.</p>
+<h2 id="biologic-motifs">Biologic Motifs</h2>
+<h3 id="representation">Representation</h3>
+<p>Biological motifs are short conserved patterns of similar or identical sequence instances as found in DNA. An example motif is the ALX3 transcription factor binding site (TFBS), MA0634.1. By controlling the expression of key genes, MA0634.1 serves a role regulating skeletal and mesoderm morphogenesis <span class="citation">[<a href="#ref-mathelier_a._fornes_o._arenillas_d.j._chen_c._denay_g._lee_j._shi_w._shyr_c._tan_g._worsley-hunt_r._et_al._jaspar_2015">6</a>]</span>. Falling within the range of 6-30bp (base pairs) long, the ALX3 TFBS is a good example of a TFBS motif. The TFBS also has 8033 reviewed samples, providing extensive supporting evidence of its role.</p>
+<div class="figure">
+<img src="./imgs/MA0634.1.svg" alt="Fig. 1: Motif logo for MA0634.1" />
+<p class="caption">Fig. 1: Motif logo for MA0634.1</p>
+</div>
+<p>The best visualization of MA0634.1 is with a motif logo. At the core of this image is a numeric representation known as a &quot;point frequency matrix&quot; (PFM) <span class="citation">[<a href="#ref-hung_motif_2017">7</a>]</span>. In PFMs each row is labeled by a base nucleotide, and the columns indicate the tally of bases at the column's position in the sequences.</p>
+<p><em>Tab. 1: PFM for MA0634.1</em></p>
+<pre class="pfm"><code>A  [ 1251   987   794  7877  7877    76   697  7877  2597  2759 ]
+C  [ 2174  3402  3367   506   317    72   729   449  1671  2446 ]
+G  [ 1062  1150   345   885   141     8   239    87  2205  1503 ]
+T  [ 3390  2337  4510   629   231  7877  7877   977  1403  1168 ]
+----------------------------------------------------------------
+        1     2     3     4     5     6     7     8     9    10</code></pre>
+<p>A basic count representation shows all positions as equally important. However, in DNA, some positions do hold more information, i.e. containing one nucleotide far more often than any other. This departure from a uniform distribution of bases at any position is called conservation. Note how, in position <code>6</code> of the PFM, T occurs in 7877 of 8033 samples. Compare to position <code>10</code> where the bases are far more uniformly distributed. Motif logos are able to visualize these differences in conservation via entropy theory and Shannon's information content <span class="citation">[<a href="#ref-schneider_sequence_1990">8</a>]</span>.</p>
+<p>Using Shannon's Information Theory and equations for Information Content and Expected Information,</p>
+<p><em>Eq. 1: Information Content</em> <span class="math display">\[I(x_i)=-\log_2\Big(P(x_i)\Big)\]</span></p>
+<p><em>Eq. 2: Expected Information</em> <span class="math display">\[H=\sum_{i=1}^{n}P(x_i)I(x_i)\]</span></p>
+<p>we can measure the level of conservation at each position individually by comparing the probabilities we would expect to an evenly distributed baseline (<span class="math inline">\(1/4\)</span> per base). These equations allow us to better weigh each position by how well conserved it is. We see in the <em>Fig. 1</em> that positions with higher conservation can be visualized larger, making it much easier to locate the start and end sites of the motif at positions 3 and 8 respectively.</p>
+<p>By default, entropy and information content measure disorder, with the highest scores corresponding to when each possible option is equally represented. Logos, as first presented by T. D. Schneider <span class="citation">[<a href="#ref-schneider_sequence_1990">8</a>]</span>, show the increase of conservation by subtracting the entropy measurement from the maximum possible level of uncertainty. In genomic data with four nucleotides the maximum amount of entropy is two bits. To calculate this conservation level for each base <span class="math inline">\(b\)</span>, Schneider presents the expression <span class="math inline">\(2 - (H(b) + e(n))\)</span> where <span class="math inline">\(H(b)\)</span> is an individual base's expected information and <span class="math inline">\(e(n)\)</span> is a correction factor required when one only has a few sample sequences.</p>
+<p>Sequence logos are the primary method of visualizing biologic motifs <span class="citation">[<a href="#ref-hung_motif_2017">7</a>]</span>, because they effectively communicate the idealized sequence. Motif instances may differ, but they will follow the probabilities from the motif model.</p>
+<h2 id="current-motif-discovery-methods">Current Motif Discovery Methods</h2>
+<p>Generating motif logos and PFMs make a large assumption that sequences will be aligned. MFAs cannot make this assumption because in genomic sequences the instances of a motif will rarely be perfectly aligned <span class="citation">[<a href="#ref-hannenhalli_eukaryotic_2008">9</a>]</span>. Biologists must then use a range of sampling and alignment of the raw sequences to find motifs. Current motif finding approaches can generally be split into three branches as listed below:</p>
+<p><strong>1: Profile Analysis</strong><br />
+TFBS's are generally searched for by selecting a 1000bp upstream sequence from co-regulated genes. These may be different genes all within the same individual, or the same gene across species. For individual cases, analysis can be performed manually in a process called profile analysis <span class="citation">[<a href="#ref-hannenhalli_eukaryotic_2008">9</a>]</span>. The biologist performs a multi-sequence local alignment using BLAST <span class="citation">[<a href="#ref-ncbiresourcecoordinators_database_2017">10</a>]</span> or similar tools. The produced alignments can be filtered based on their information content scores, and PFMs are generated from the highest scoring results. Profile analysis requires human observation at nearly every stage of the process, thus for large batches of cases, more automated MFAs are used.</p>
+<p><strong>2: Combinatoric algorithms</strong><br />
+The combinatoric family of motif discovery algorithms uses enumeration to solve for the problem of how likely it is to find a specific pattern <span class="math inline">\(p\)</span> of length <span class="math inline">\(l\)</span> with <span class="math inline">\(m\)</span> mutations among sequences <span class="math inline">\(n\)</span> long. These methods are related to the brute force approach of checking every possible sub-string, but use various assumptions to reduce runtime. For example, many equate this brute force example to the median string problem <span class="citation">[<a href="#ref-jones_introduction_2004">11</a>]</span>. These algorithms, such as WEEDER and PSMILE <span class="citation">[<a href="#ref-pavesi_algorithm_2001">12</a>], [<a href="#ref-carvalho_efficient_2004">13</a>]</span>, will find a globally optimal solution given the data. But, combinatoric algorithms in particular are also known to struggle with longer motifs with high variability, and must deal with an exponentially growing search-space.</p>
+<p><strong>3: Probabilistic Algorithms</strong><br />
+The third grouping of motif finding algorithms, are probabilistic algorithms, of which the expectation maximization type are the most common <span class="citation">[<a href="#ref-das_survey_2007">1</a>]</span>. In pseudocode we can see the general steps of the expectation maximization algorithm</p>
+<p><em>Code 1: Expectation Maximization</em></p>
+<pre class="pseudocode"><code>decide length of motif we would like to find
+choose random starting points in sequences
+do:
+    generate PFM from starting points + decided length
+    score every sub-string in sequence against PFM
+    for top scoring sub-strings as TSS:
+        use TSS to update starting points 
+until scores stop increasing</code></pre>
+<p>This process is remarkably effective, particularly with improvements to deciding where to initially set the starting points such as with Gibb's sampling <span class="citation">[<a href="#ref-das_survey_2007">1</a>]</span>. It should be noted that these methods implement a large amount of randomness, meaning that these probabilistic algorithms are apt to find a local optimum in their search. Biologists often run these algorithms multiple times, to increase the chances of finding the global optimum, but this takes increasing time with the length of the sequences. Despite these drawbacks, probabilistic algorithms are especially good at finding longer motifs with high variability.</p>
+<p>By working on the raw sequences these three branches encounter certain common limitations in terms of memory use and speed. Various studies have benchmarked and tested the current MFAs and specified several challenges <span class="citation">[<a href="#ref-das_survey_2007">1</a>]–[<a href="#ref-hu_limitations_2005">5</a>]</span>.</p>
+<p>These challenges include:</p>
+<p><strong>Robustness to noise:</strong><br />
+Due to a lack of knowledge on how to accurately model genomic data, it is often difficult to separate the true motifs from spurious motifs that arise in the data from random chance. This also relates to the extreme difference in signal to noise ratio, trying to find a 6-30bp motif in sequences over 1000bp long.</p>
+<p><strong>Ability to handle different sized motifs:</strong><br />
+As seen in both the combinatoric and probabilistic algorithms, we often need to decide what length of motif we would like to find prior to searching. This is a significant issue since we usually don't know how long the motif should be. This requires that we run the algorithm multiple times, increasing both the runtime and the number of results we must sift through at the end.</p>
+<p><strong>Efficiency with increasingly large sequences:</strong><br />
+A continual issue, most MFAs grow exponentially with an increase in the length of sequences, and with the lowering cost to sequence large sections of the genome <span class="citation">[<a href="#ref-heather_sequence_2016">14</a>]</span> algorithmic efficiency is a pressing challenge.</p>
+<h2 id="potential-application-of-unidip">Potential Application of UniDip</h2>
+<p>Some of these challenges can be mitigated by combining algorithms in ensemble methods. Different types of MFAs, are able to find different types of motifs <span class="citation">[<a href="#ref-das_survey_2007">1</a>], [<a href="#ref-simcha_limits_2012">4</a>]</span>. Combinatoric algorithms can be better at finding shorter motifs, and probabilistic algorithms can be better at longer motifs. This specialization of MFAs, means that ensemble methods can work very well <span class="citation">[<a href="#ref-simcha_limits_2012">4</a>], [<a href="#ref-hu_limitations_2005">5</a>]</span>. But some other issues can be exacerbated — in particular, the time needed to fit each individual model. What is needed is a way to reduce the time taken by existing algorithms. Time reduction can be achieved most flexibly by introducing data preprocessing steps. Improvements to hardware are expensive, and improvements to a core algorithm only affect that algorithm. Preprocessing steps can be performed on any machine, and the output is useful to many downstream algorithms.</p>
+<p>One of the core difficulties of motif discovery is the search space involved. Attempting to find a 6-30bp degenerate (non-exact) pattern in DNA samples 1000bp long or longer is hard. Most MFAs asymptotically grow at an exponential rate <span class="citation">[<a href="#ref-das_survey_2007">1</a>], [<a href="#ref-hu_limitations_2005">5</a>]</span>, meaning that just doubling the sample lengths to 2000bp presents a serious challenge to motif discovery. Yet, the challenges of signal extraction from data with high noise to signal ratios are not unique to motif discovery. We should take advantage of this prior work and apply it to the problem of motif finding. In particular, the noise-robust UniDip algorithm could prove well suited to motif discovery's particular set of challenges.</p>
+<p>The UniDip algorithm is a core component of the SkinnyDip algorithm, developed by Maurus and Plant in 2016, and as Maurus and Plant describe &quot;Practically, [SkinnyDip's] run-time grows linearly with the data&quot; <span class="citation">[<a href="#ref-maurus_skinny-dip:_2016">15</a>]</span>. The big difference between UniDip and other clustering algorithms is that UniDip starts from an assumption that most of the data is noise. In centroid based methods all data is considered important, and thus all data points will be assigned to a cluster. Even density and expectation maximization based methods struggle with excluding noise effectively. UniDip and SkinnyDip are able to efficiently isolate clusters, ignoring noise. In the case of motif discovery, UniDip will be able to isolate areas of high conservation in genomic sequences, trimming away large sections of sample sequences that only serve to slow current MFAs.</p>
+<p>UniDip is potentially powerful, but with these features also come some limitations. UniDip was developed to cluster continuous numeric distributions, data significantly removed from the symbolic letter-based format common to genomic datasets. We can transform the symbolic data to numeric data via aggregated representations taking inspiration from motif logos and PFMs. These representations will make UniDip heavily reliant on sequence alignment when isolating clusters. But, the aggregations have the benefit of reducing the dimensionality of the data, greatly increasing speed. The task of applying UniDip to symbolic data is also easier, as we are not aiming for exact motif instance extraction. We are only attempting to find concentrations of conserved bases, such that current MFAs, like MEME, can run on reduced data sets while still locating the embedded motifs. UniDip has the potential to make current MFAs scalable to the much larger sample sequences that are becoming more common with the reduced price of genomic sequencing.</p>
+<h1 id="the-unidip-algorithm">The UniDip Algorithm</h1>
+<p>The UniDip algorithm is able to find clusters in univariate continuous numeric distributions by layering itself over the Hartigan Test of Unimodality <span class="citation">[<a href="#ref-hartigan_dip_1985">16</a>]</span>. This formal statistical test is not well known outside of statistical circles, but does provide some useful features. These features include linear time complexity and non-parametric compatibility to any unimodal distribution, e.g. Gaussian, Uniform, or Beta distributions. SkinnyDip is a multivariate version of UniDip, which recursively runs UniDip across each dimension.</p>
+<h2 id="hartigans-dip-test-of-unimodality">Hartigan's Dip Test of Unimodality</h2>
+<p>Hartigan's dip-test makes use of a distribution's empirical cumulative distribution function (ECDF). As can be seen from the plot below, this function's gradient increases approaching a peak in the histogram, and decreases after. In unimodal data, this creates a stretched S shape.</p>
+<div class="figure">
+<img src="./imgs/1PeakWithECDF.png" />
+
+</div>
+<div class="figure">
+<img src="./imgs/3PeakWithECDF.png" alt="Fig. 2: Histogram and ECDF for one and three peak distributions" />
+<p class="caption">Fig. 2: Histogram and ECDF for one and three peak distributions</p>
+</div>
+<p>The dip-test performs a best fit to this shape, finding a minimal width path such that, from left to right on the X axis, the gradient only increases until it reaches a point whereafter the gradient only decreases. The dip statistic is defined as the width of this path divided by two, and does not vary with shifting or scaling.</p>
+<p>Upon return of this dip statistic, we may compare against a suitable unimodal null distribution. To obtain a p-value, Hartigan suggests that the Uniform distribution is preferred <span class="citation">[<a href="#ref-hartigan_dip_1985">16</a>]</span>. If the p-value is greater than the significance threshold, <span class="math inline">\(\alpha\)</span>, we accept the null hypothesis that the distribution is unimodal, otherwise we accept the alternative that the distribution is <em>at least</em> bi-modal.</p>
+<p>The dip statistic and p-value are not enough in themselves to help locate peaks. However, the dip-test also provides a modal interval, which specifies a lower and upper index to the isolated cluster. From these four pieces of information, we can begin to search a univariate dataset.</p>
+<h2 id="unidip-recursive-application-of-the-dip-test">UniDip, Recursive Application of the Dip Test</h2>
+<p>UniDip recursively searches a data sample to find peaks of density. It starts by dipping along the entire single dimensional set of data. If the data is unimodal then it returns the full set of data as the modal interval. Otherwise, it recursively calls UniDip within its located modal interval until it has isolated each individual peak.</p>
+<p>UniDip then applies itself to the left and right of the root-level modal interval. Since the dip-test can only differentiate between unimodal and multi-modal distributions, to determine if there are indeed peaks of interest to the left or right UniDip needs to include the left-most or right-most detected peak from the modal interval. By including this extra peak, the dip-test only shows evidence for multiple peaks if there are indeed additional peaks to the left or right. At the end of this depth-first search, UniDip returns the union of all recursive steps.</p>
+<p><em>Code 2: The UniDip Algorithm</em></p>
+<pre class="pseudocode"><code>INPUT: 
+    X, (1d sorted vector)
+    alpha, (float, significance level)
+    isMod, (boolean, is inside modal interval)
+
+OUTPUT: set of modal intervals
+    where a modal interval := (lower index, upper index)
+
+UniDip(X, alpha=0.05, isMod=True)
+    dip, pval, li, ui = DipTest(X)
+
+    if pval &gt; alpha
+        return (if isMod) ? (X[0], X[-1]) : (li, ui)
+
+    // recurse into interval
+    Mm = UniDip(X[li, ui], alpha, True)
+
+    // find left and right most intervals
+    U = min(Mm, key=&gt;(t) t[-1]); L = max(li, key=&gt;(t) t[0])
+
+    // check if left side is at least bi-modal when including
+    // the left most mode then do same check but to the right
+    pL = DipTest(X[X &lt;= U]); pU = DipTest(X[X &gt;= L])
+
+    // recurse left if at least bi-modal
+    Ml = (if pL &lt;= alpha) ? UniDip(X[X &lt; li], alpha, False) : ()
+
+    // recurse right if at least bi-modal
+    Mu = (if pU &lt;= alpha) ? UniDip(X[X &gt; ui], alpha, False) : ()
+
+    return Mm &amp; Ml &amp; Mu</code></pre>
+<h2 id="skinnydip-recursive-application-of-unidip">SkinnyDip Recursive Application of UniDip</h2>
+<p>The multidimensional variant of UniDip, SkinnyDip, is beyond the scope of this project. But, is briefly described as another layer on top of UniDip.</p>
+<p><em>Code 3: The SkinnyDip Algorithm</em></p>
+<pre class="pseudocode"><code>for each dimension
+     get UniDip intervals
+     within each interval
+         get SkinnyDip hyperinterval from subsequent dimensions
+return hyperintervals</code></pre>
+<p>SkinnyDip recursively runs UniDip across each dimension, and, in the event that it finds clusters, SkinnyDip checks the subsequent dimensions to determine intersections. In two dimensions the intersections or &quot;hyper-intervals&quot; will be squares, in three dimensions they will be cubes.</p>
+<p>While motif discovery starts with data in the form of many 1000bp long genomic sequences, the aim is to measure the level of nucleotide conservation, an inherently univariate metric. In the motif logos and PFMs, representations such as frequency and information content measure conservation as a function of each nucleotide. Distilling those representations down to a single function of position allows the isolation of conserved regions with the univariate UniDip algorithm.</p>
+<h2 id="implementing-the-basic-unidip-algorithm">Implementing the Basic UniDip Algorithm</h2>
+<p>Before attempting to introduce any symbolic letter-based data we implemented our version of the UniDip algorithm in Python to the same specifications as the original UniDip source code <span class="citation">[<a href="#ref-samhelmholtz_skinny-dip:_2017">17</a>]</span>. One challenge in implementing this algorithm is that there are very few libraries for calculating the Hartigan dip statistic. We settled on an implementation by Johannes Bauer <span class="citation">[<a href="#ref-bauer_dip_test:_2018">18</a>]</span> because its test suite proves it gives the same results, to within eight decimal places, as those of the R package used by the original UniDip algorithm.</p>
+<p>Bauer's dip implementation is slightly limited in that while it does calculate the dip statistic, it does not calculate a p-value for that statistic. To run a dip test, we calculate the dip in the data and then compare against a null distribution of dip statistics generated from random samples of the standard uniform distribution as recommended by Hartigan <span class="citation">[<a href="#ref-hartigan_dip_1985">16</a>]</span>. Since we would like to find mode clusters with a significance <span class="math inline">\(\alpha\)</span> of 0.05, we can run a dip test to this significance with <span class="math inline">\(N = 1000\)</span> samples. While our approach is effective for this prototype stage, it is not optimal for two reasons. One, we are introducing randomness into an otherwise deterministic algorithm. And two, generating 1000 samples for every calculation of a p-value is a drain of computational resources. Martin Mächler has already studied these issues and found that p-value estimates can be interpolated from generated tables. This method allows for much faster and deterministic performance <span class="citation">[<a href="#ref-machler_dip_2016">19</a>]</span>. Moving forward with UniDip, one necessary step will be using this type of p-value interpolation table.</p>
+<p>After implementing the basic UniDip algorithm and Hartigan dip test we are able to isolate peaks in univariate numeric samples. We successfully tested our implementation with concatenated random samples from normal distributions, with 1, 2, and 5 peaks among 80% noise.</p>
+<div class="figure">
+<img src="./imgs/plots-from-random-normal.png" alt="Fig. 3: UniDip clustering on combined normal distributions." />
+<p class="caption">Fig. 3: UniDip clustering on combined normal distributions.</p>
+</div>
+<p>As we can see from this image, UniDip is able to isolate the regions of higher density. Returning the lowest and highest index of the clusters from the sorted dataset.</p>
+<h1 id="methodology">Methodology</h1>
+<p>If we would like to apply UniDip to genomic data we will need to make modifications, both by transforming the data and the algorithm itself. In this section we will detail what steps we took to apply the SkinnyDip family of algorithms to symbolic data.</p>
+<h2 id="applying-to-histogram-data">Applying to Histogram Data</h2>
+<p>To start, we will make some changes to the UniDip algorithm so that it can work with more discrete forms of data. The core of UniDip, Hartigan's dip-test, only requires access to the ECDF of the data. Thus, UniDip may be applied to any data reducible to an ECDF. An ECDF can be calculated either directly from the sample of a continuous random variable, or an approximation can be made from the Y coordinates of the bins in a histogram.</p>
+<p><em>Eq. 3: Calculate ECDF from continuous random variable as X</em> <span class="math display">\[\text{ECDF } = X_1 ... X_n / \max(X)\text{; Where }X_i \leq X_{i+1}\]</span></p>
+<p><em>Eq. 4: Approximate ECDF From histogram bin heights as H:</em> <span class="math display">\[\text{ECDF } \approx \frac{H_k}{n} \in H \text{;  Where:} H_k = \sum_{i=1}^{k}H_i\]</span></p>
+<p>In case of a random continuous variable, grouping points inevitably loses detail, but increasing the number of bins reduces this loss.</p>
+<div class="figure">
+<img src="./imgs/histogramConversion.png" alt="Fig. 4: Histogram and ECDF calculated from random continuous variable and histogram bin heights" />
+<p class="caption">Fig. 4: Histogram and ECDF calculated from random continuous variable and histogram bin heights</p>
+</div>
+<p><em>Fig. 4</em> plots a random sample of 500 points from a normal distribution, and shows that the cumulative sum of the histogram bin heights is a reasonable estimate of the ECDF.</p>
+<p>The reason it is useful to generate an ECDF from histogram heights, is because thinking back to the sequence logos, there are a lot of similarities to a histogram. Each position in the sequence can be compared to a bin, with the height of the combined letters determined by the level of conservation at that position. A univariate vector showing the level of conservation at each position in the sequence is then easily converted into an ECDF as necessary for the application of UniDip.</p>
+<p>To apply UniDip directly to histogram data, we still must change one core assumption of the algorithm. Looking back to <em>Eq. 3</em>, we see that the ECDF is calculated on a vector sorted lowest to highest by value. This means that, by default, UniDip sorts its inputted data. This works with a random sample where order is only determined by value and not position. But, when working with histogram data, sorting by value would destroy the data's inherent ordering.</p>
+<p>This problem with sorting springs up in even more obscure parts of the algorithm. When presented with unimodal data, Hartigan's dip-test will tend to return an extremely narrow model interval. Often this occurs when recursing into modal intervals, but in that case UniDip can simply return the end points of the parent modal interval as it is significantly certain that all of the data points are a part of the same peak.</p>
+<p><em>Code 4: UniDip returning modal intervals</em></p>
+<pre class="pseudocode"><code>if unimodal
+    return (if isMod) ? (X[0], X[-1]) : (Mod[0], Mod[-1])</code></pre>
+<p>However, an issue occurs when recursing to the left or right of the modal interval. If there is only one modal peak, following the pseudocode from above, UniDip will return an interval cutting off a large portion of the peak's tails. The solution that Maurus and Plant developed is to &quot;mirror&quot; the data, such that if the data is <code>[1, 2, 3]</code> the mirrored dataset is <code>[-2, -1, 0, 1, 2]</code>. What this means is that when UniDip is recursing to the left or right and it has found a single peak, UniDip will perform the dip test on a bimodal mirror-set of the data to extract the whole peak.</p>
+<p>Data mirroring becomes a problem when applied to histogram data because the specific mirroring algorithm Maurus and Plant use sorts by value. To allow histogram data, we replaced this with a mirror function that flips the data by index rather than value.</p>
+<p><em>Code 5: Mirroring data</em></p>
+<pre class="pseudocode"><code>if flip_left:
+    mirror_data = concatenate((flip(X[1:]), X))
+else:
+    mirror_data = concatenate((X[:-1], flip(X)))</code></pre>
+<p>Making these modifications we are able to apply the UniDip algorithm to histogram data and isolate the same clusters as we would using the raw random samples.</p>
+<div class="figure">
+<img src="./imgs/histogramClustered.png" alt="Fig. 5: UniDip clustering on continuous and histogram data" />
+<p class="caption">Fig. 5: UniDip clustering on continuous and histogram data</p>
+</div>
+<h2 id="applying-to-symbolic-data">Applying to Symbolic Data</h2>
+<p>Taking the next step, we can apply UniDip to symbolic data. We will start on the simplest data we can generate. The motif will be a 15bp long poly-A sequence with no mutations. We will surround this sequence on each side with a 100bp background sequence of 1/4 uniform sampling of all four nucleotides. We will generate 20 sequences of this type and visualize them with point frequency and individual information content.</p>
+<div class="figure">
+<img src="./imgs/polyAMetricsSingle.png" alt="Fig. 6: Aggregated numeric representations of genomic data" />
+<p class="caption">Fig. 6: Aggregated numeric representations of genomic data</p>
+</div>
+<p>The first item to notice about both these metrics is that they are calculated individually by base. There are separate measurements for Adenine, Cytosine, Guanine, and Thymine. This separation can be important later on in representing motifs as it is important to know if position <code>i</code> is always &quot;A&quot; or perhaps can be either &quot;A&quot; or &quot;C&quot;. At this stage though, it is more important to measure overall conservation so that UniDip can isolate the motif regardless of its specific pattern. Later analysis can uncover the individual nucleotide likelihoods.</p>
+<p>An overall metric is possible using expected information content, also called entropy. Entropy can be calculated at each position as the sum of each base's information weighted by its percentage.</p>
+<p><em>Eq 5: Entropy by position</em> <span class="math display">\[H= -\sum_{i=a}^{t} P(x_i) \log_2(P(x_i))\]</span></p>
+<p>Applying an entropy calculation column-wise along the sequence will allows measurement of general conservation non-specific to any particular nucleotide. But, entropy by itself is not well suited to UniDip. Looking at the individual information content in <em>Fig. 6</em>, we see that higher scores actually correspond to less frequency. This makes sense because a sequence that is always a single symbol cannot convey any information.</p>
+<p>However, to measure conservation, we would like to invert the Y axis and scale to above 0. This transformation is important for two reasons. First, inverting and scaling makes thinking about conservation easier, making higher scores indicate higher conservation. Second, inverting and scaling makes the metric conform to the format of histogram data that we have already shown interfaces well with UniDip. Following the example set by motif logos, we invert the Y axis and scale in one step by subtracting the positional entropy from the maximum score possible with four possible nucleotides <span class="math inline">\(2-H(X)\)</span>. After this transformation, we can visualize the simple sequence as scaled negative entropy (SNE).</p>
+<div class="figure">
+<img src="./imgs/polyANegEnt.png" alt="Fig 7: Scaled Negative Entropy (SNE)" />
+<p class="caption">Fig 7: Scaled Negative Entropy (SNE)</p>
+</div>
+<p>We can see the metric shows a high peak in the region of the poly-A motif, indicating its conservation. The surrounding regions vary with each position, but are nowhere near the height of the generated motif.</p>
+<p>By default, with unimodal data, UniDip would return all the data as a single cluster. We can make another change to the algorithm, so that, in the event that we return a single cluster, we subsequently perform data mirroring to isolate the single region of highest conservation.</p>
+<div class="figure">
+<img src="./imgs/polyACluster.png" alt="Fig. 8: UniDip clustering on symbolic data" />
+<p class="caption">Fig. 8: UniDip clustering on symbolic data</p>
+</div>
+<p>In this example, UniDip returns the interval spanning positions 100-116. The actual motif instances span positions 100-115, meaning UniDip returned an interval one position too wide. This is still a good match, and for such simple examples with large difference between conserved and non-conserved regions, UniDip could be used on its own for motif discovery. Real genomic sequences are much more complex, so this result is not indicative of real world performance. However, this example does show that we are able to isolate a region of high conservation in symbolic data.</p>
+<h3 id="applying-to-multi-symbol-motifs">Applying to Multi-Symbol Motifs</h3>
+<p>Because SNE is an overall metric, a function of position not nucleotide, UniDip works with motifs that are not all the same base. The motif will be the 15bp long sequence <code>ACTGTGCACGTGACG</code> with no mutations. Other parameters to the background sequence remain the same. Visualizing with SNE, it is hard to see much difference compared to our previous example in <em>Fig. 7</em>.</p>
+<div class="figure">
+<img src="./imgs/MultiLet02.png" alt="Fig. 9: SNE with multi-symbol motif" />
+<p class="caption">Fig. 9: SNE with multi-symbol motif</p>
+</div>
+<p>It is only when looking at the individual metrics that the difference is clear.</p>
+<div class="figure">
+<img src="./imgs/MultiLet01.png" alt="Fig. 10: Individual metrics with multi-symbol motif" />
+<p class="caption">Fig. 10: Individual metrics with multi-symbol motif</p>
+</div>
+<p>This consistency of SNE shows why it is important to have this grouped univariate metric. While the conservation of each individual nucleotide varies, the univariate metric, SNE, shows clearly where the motif is positioned. Utilizing univariate measures of conservation, UniDip can detect multi-symbol motifs in genomic data.</p>
+<div class="figure">
+<img src="./imgs/MultiLet03.png" alt="Fig. 11: Univariate metric (SNE) allows UniDip clustering" />
+<p class="caption">Fig. 11: Univariate metric (SNE) allows UniDip clustering</p>
+</div>
+<h3 id="applying-to-degenerate-data">Applying to Degenerate Data</h3>
+<p>Introducing mutations does increase the difficulty in finding the regions of conservation because conservation is lowered closer to the background sequence. We introduced 6 mutations into each instance of the motif across the 20 samples, with few effects.</p>
+<div class="figure">
+<img src="./imgs/degenerateSeq03.png" alt="Fig. 12: SNE with 6 mutations per motif instance" />
+<p class="caption">Fig. 12: SNE with 6 mutations per motif instance</p>
+</div>
+<p>But higher levels of degeneracy do have an effect making UniDip return a wider interval. In this case we increase degeneracy to 10 potential mutations per instance.</p>
+<div class="figure">
+<img src="./imgs/degenerateSeq04.png" alt="Fig. 13: SNE with 10 mutations per motif instance" />
+<p class="caption">Fig. 13: SNE with 10 mutations per motif instance</p>
+</div>
+<p>This level of degeneracy is high for a motif, but a similar effect will be seen where the background sequence becomes more conserved. With less of a threshold between the signal and background, UniDip is apt to lose specificity. UniDip is still useful even when it is unable to exactly match motif sites. Note that the cluster above still contains the motif instances and has, by exclusion, marked out a large portion of the sequence to rule out. Despite the lessened difference in signal to noise, UniDip has still narrowed the search space considerably.</p>
+<h2 id="applying-to-differently-aligned-motifs">Applying to Differently Aligned Motifs</h2>
+<p>Due to how SNE is calculated, UniDip is heavily reliant on the alignment of sequences to be able to measure nucleotide conservation. Even a misalignment of few nucleotides can obfuscate the entropy calculations. Thus, misaligning motifs is the largest challenge in applying UniDip to motif discovery. For reference, compare the below SNE plots that show data sets of 20 sequences. In one we have added a random +/-5bp misalignment and the other has perfect alignment.</p>
+<p><img src="./imgs/maskedMotifMisaligned.png" /> <img src="./imgs/maskedMotifAligned.png" /></p>
+<p><em>Fig. 14: Misaligned (top) and aligned (bottom) motif instances</em></p>
+<p>If the amount of misalignment is minor, this problem with misalignment could possibly be alleviated by increasing the amount of data. Once we have enough sequences, motif instances will overlap such that we can detect the conservation. For 15bp motifs with mis-alignments of +/-5 adjacent positions we could be assured of a perfect alignment with 10 or more samples. But, this also means that the conservation would grow not just at a single motif site but at all overlapped motif sites. For the 15bp motif, conservation would increase in a 25bp region.</p>
+<p>However, in real sequences there are very few assumptions on where the motif instances will fall <span class="citation">[<a href="#ref-hannenhalli_eukaryotic_2008">9</a>]</span>. One general assumption for TFBS's is that, both with single-species co-regulated genes and across species orthologs, the TFBS may fall anywhere within 1000bp upstream of the transcription start site. With misalignments of 1000bp, we would only expect there to be a perfect alignment by chance after collecting 500 sequences. This requirement for data samples is multiple orders of magnitude larger than other motif finding algorithms.</p>
+<p>Global alignment tools can reduce this number of required samples. The MUSCLE alignment tool <span class="citation">[<a href="#ref-edgar_muscle:_2004">20</a>]</span>, performs a multi-sequence alignment minimizing the number of mutations, insertions, and deletions as much as possible. Other alignment tools exist and an in-depth comparison of their merits is warranted for further research, but we will only be using MUSCLE for this project. Global alignment tools move motif instances to overlap more and boost conservation in select regions. Of course, performing the alignment does introduce its own issues. First, MUSCLE introduces gaps where previously sequences were contiguous. Second, because MUSCLE is actively forcing the sequences to align better, SNE is no longer directly measuring sequence conservation.</p>
+<p>Regarding the introduction of gaps, complications arise from needing to handle a new symbol, &quot;-&quot;, indicating an insertion. It is not immediately clear how to count this insertion. If &quot;-&quot; is counted like any letter there will be large sections of perfect conservation, which will mask the signals of true conservation. However, there are equally large problems if &quot;-&quot; is automatically set to 0. Remembering that entropy calculations divide by the counts of each base, having sections of 0 could lead to division errors. Instead, for any insertion we add a tally to all other bases. Consequently, positions with many insertions have their conservation level lowered as the counts of bases at that position become more uniform.</p>
+<p>So, is this tallying method enough to be able to effectively handle misalignments? Generating 20 sample sequences with a motif at a random misalignment of +/-10bp, we see a high peak where the motifs have been aligned. However, after running UniDip on this data, UniDip is now clustering not just the motif but all alignments as well. This is because there are now three levels of conservation: the gaps, the background sequence, and the motif. UniDip is unable to find nested clusters, where there are multiple steps of density.</p>
+<div class="figure">
+<img src="./imgs/GappedAlignedClustered.png" alt="Fig. 15: UniDip clustering on aligned sequences" />
+<p class="caption">Fig. 15: UniDip clustering on aligned sequences</p>
+</div>
+<p>Trimming the gaps from the data overcomes this limitation. The gaps are at a relatively even level less than 0.1 SNE. By filtering and concatenating only regions that are greater than that threshold, UniDip is able to correctly isolate just the conserved motif once again.</p>
+<div class="figure">
+<img src="./imgs/UnGappedAlignedClustered.png" alt="Fig. 16: UniDip clustering on aligned and trimmed sequences" />
+<p class="caption">Fig. 16: UniDip clustering on aligned and trimmed sequences</p>
+</div>
+<p>Removing these gaps might present a problem for being able to map back to the original sequence instances, but by keeping track of the aligned indices while performing the filtering we are able to maintain the ability to map back to the original instances.</p>
+<h2 id="methodology-summary">Methodology Summary</h2>
+<p>In this section we have shown the methods that make it possible to isolate regions of conservation from symbolic genomic data using the UniDip algorithm. We have found that scaled negative entropy is easily utilized by UniDip and well represents positional conservation. SNE mitigates the challenges of multi-symbol degenerate motifs very well, though it does falter when facing misaligned motif instances. To mitigate this factor, we used the global alignment tool MUSCLE, which allows us to concentrate motif instances in select regions. And, by trimming gaps, we are able to isolate regions of conservation from the background sequence.</p>
+<h1 id="evaluation">Evaluation</h1>
+<p>In the previous section, we showed UniDip can, in generated examples, isolate a conserved motif from symbolic data. And, in more complex simulations still isolate regions of conservation from aligned samples. In this section, we will evaluate the UniDip algorithm by presenting a case study showcasing UniDip's abilities when working with real genomic sequences, and describe how UniDip will help in future motif discovery projects.</p>
+<h2 id="case-study-with-foxk1-transcription-factor-binding-site">Case Study with FOXK1 Transcription Factor Binding Site</h2>
+<p>We will evaluate UniDip on real genomic sequences by performing a sequence analysis case study on MA0852.2, the binding site to the FOXK1 transcription factor. As categorized in the JASPER database <span class="citation">[<a href="#ref-mathelier_a._fornes_o._arenillas_d.j._chen_c._denay_g._lee_j._shi_w._shyr_c._tan_g._worsley-hunt_r._et_al._jaspar_2015">6</a>]</span>, FOXK1 is a transcription factor in the class of Fork head / winged helix factors, and is known to regulate antiviral gene expression <span class="citation">[<a href="#ref-panda_transcription_2015">21</a>]</span>.</p>
+<p>The JASPER database contains 1056 instances of this TFBS, which compile into the below logo.</p>
+<div class="figure">
+<img src="./imgs/MA0852.2.svg" alt="Fig. 17: JASPER logo for MA0852.2" />
+<p class="caption">Fig. 17: JASPER logo for MA0852.2</p>
+</div>
+<p>The instances in the JASPER database are not useful for evaluating UniDip on real sequences. While the JASPER instances do have some of the surrounding sequence, the extensions are short and centered around the motif instance. JASPER does provide a <code>.bed</code> file which contains the genomic coordinates. For the latest version of MA0852.2 all sequences are located in the GRCh38.p12 human genome assembly <span class="citation">[<a href="#ref-ncbiresourcecoordinators_database_2017">10</a>]</span>. Our preferred method for extracting these motif instances would be to track the gene associated with each instance and pull the 1000bp upstream sequence from the transcription start site. Unfortunately, JASPER does not track the associated genes. So instead, we emulate how the motif instances would likely occur throughout the 1000bp sequences, by randomly selecting 1000 bases up and down stream of the motif instance such that the overall sequence remains 1000bp long.</p>
+<p>We wrote a Python script that downloads the <code>.bed</code> file and the human genome's individual <code>.fasta</code> files for each chromosome. The same script then maps the motif locations to the corresponding chromosomal positions before extracting and saving the sequence instances as a single <code>.fasta</code> file. JASPER's record of MA0852.2 contains instances across all chromosomes except the Y chromosome.</p>
+<p>To test our sequence extraction process and have a control without any preprocessing, we ran MEME on the raw MA0852.2 sequences <span class="citation">[<a href="#ref-bailey_meme_2009">22</a>]</span>. The process took 16 hours of real time on a single CPU, and resulted in finding the MA0852.2 motif in the top three results nearly exactly to how the logo is represented in the JASPER database.</p>
+<div class="figure">
+<img src="./imgs/MA0852RAW.png" alt="Fig. 18: MEME logo of MA0852.2 discovered from raw sequences" />
+<p class="caption">Fig. 18: MEME logo of MA0852.2 discovered from raw sequences</p>
+</div>
+<p>Having confirmed our extraction method, we test the preprocessing steps by aligning the sequences with MUSCLE and trimming the gaps after calculating SNE by position. <em>Fig 19</em> shows the sequence conservation from the original sequences, after alignment, and after gap trimming.</p>
+<p><img src="./imgs/RealOriConservation.png" /> <img src="./imgs/RealAlignedConservation.png" /> <img src="./imgs/RealTrimmedConservation.png" /></p>
+<p><em>Fig. 19: Raw Sequences (top), Aligned Sequences (middle), Aligned and Trimmed Sequences (bottom)</em></p>
+<p>Among the first things to notice as different between the raw sequences and the prior simulated examples is the lack strong conservation in specific regions. The highest level of conservation is 0.012 from a maximum of 2 bits of information. Running UniDip on across SNE calculated from the raw sequences would be meaningless as there are not any significant changes in conservation level drawn out from the metric.</p>
+<p>However, after alignment and trimming, the maximum information content as measured by SNE has increased from 0.012 to approximately 0.68. From alignment and trimming, the sequence lengths have shortened to less than 900bp long, and there are clear peaks in conservation along the sequences. Running the UniDip algorithm does not isolate the smaller peaks, but it does isolate the regions where these peaks reside. With the default significance threshold of <span class="math inline">\(\alpha = 0.05\)</span>, UniDip detects two regions of higher conservation. Raising this threshold would allow us to isolate more and smaller clusters, but at a higher risk of the clusters merely being a phenomenon of the sampling and processing steps. MEME and its fellow algorithms are designed to function on sequences with some background noise, which gives another reason to not make UniDip too specific.</p>
+<div class="figure">
+<img src="./imgs/RealTrimmedCluster.png" alt="Fig. 20: UniDip isolates regions of higher conservation" />
+<p class="caption">Fig. 20: UniDip isolates regions of higher conservation</p>
+</div>
+<p>There may not be a clear indication of a single motif like in the simulated examples, but the alignment tool and UniDip working in conjunction are able to locate enhanced concentrations of motif instances in the aligned sequences. The left cluster covers 33% of the sequence but overlaps 40% of the motif instances. Likewise, the right cluster covers 20% of the sequence length but overlaps 25% of the motif instances. This concentration of motif instances enhances MEME's performance. We noted above that MEME took over 16 hours to find the motif from the raw sequences. This is mostly due to how many possible combinations there are in 1056 sequences 1000bp long. Limiting the search space to the isolated clusters shrinks that search space considerably. Indeed, even with the larger cluster being 330bp long, the search space is reduced by an order of magnitude.</p>
+<p>It is hard to separate how much of a role MUSCLE plays compared to UniDip. MUSCLE is aligning the sequences, allowing effective use of SNE. But, after initial trimming, sequences are still 90% of their initial length. It is only after running UniDip that specific regions are isolated to 33% and 20% of the raw lengths. Further examinations should study the difference in role, and compare UniDip's selections to random selections. Such a study is dependent on the sequences given, but we are confident that in datasets where alignment levels are variable across the sequence's length UniDip is able to isolate those regions of highest conservation and concentration.</p>
+<p>We can rank the relevance of the two isolated regions by their average conservation. This ranking allows prioritization of the regions, such that regions with more prominent motifs are searched first. Ranking the regions, we see that the left region has an average SNE of 0.31 and the right region has 0.28. They are very close, so we should search both, but the left region seems to have slightly more conserved peaks. We use an average both to control for the length of the isolated region and because the average is sensitive to outliers. We want to search those regions with particularly high peaks and exclude those regions with particularly low gaps.</p>
+<p>Running MEME on the isolated regions, we find the MA0852.2 motif in the top three matches of both regions 70% faster than discovery took on the raw sequences. Including preprocessing, MEME took a total time of 280 minutes or 4 hours and 40 minutes compared to the original 16 hours. Breaking down the total time, MUSCLE alignment took 30 minutes; UniDip clustering took 10 minutes; MEME on the left isolated cluster took 150 minutes; and MEME on the right cluster took 90 minutes.</p>
+<div class="figure">
+<img src="./imgs/MA0852TRIMMED.png" alt="Fig. 21: MEME logo of MA0852.2 discovered from left-most isolated cluster" />
+<p class="caption">Fig. 21: MEME logo of MA0852.2 discovered from left-most isolated cluster</p>
+</div>
+<p>From the total time of 280 minutes, UniDip took just 10 of those minutes. UniDip, in this implementation, is still largely unoptimized and has ample room for improvements in speed. This speed is a result of aggregated metrics' power in condensing information. Transforming the genomic data into a univariate measure of conservation allows for a rapid filtering based on that variable. Due to the detail loss from aggregation, UniDip may not be able to always function as a standalone motif finding algorithm. But, it can play a strong role in preprocessing genomic sequences, greatly reducing the time it takes to run modern MFAs like MEME. This case study shows that UniDip is beneficial to the search for biological motifs in real genomic data.</p>
+<h1 id="conclusion-further-research">Conclusion &amp; Further Research</h1>
+<p>We have proved in this paper that exclusively numeric algorithms like UniDip can be applied to symbolic genomic data. In simple examples, UniDip is able to directly isolate multi-letter degenerate motifs in symbolic data, provided the motif instances are aligned. And, in conjunction with global alignment tools, UniDip is able to detect regions of higher conservation with greater concentrations of motif instances. This detection allows us to better focus our search with other motif discovery tools, saving considerable time. UniDip and its use of the Hartigan dip-test provides a new way of thinking about the problem of motif discovery and warrants further research.</p>
+<p>Further research could continue in two directions. First, UniDip should be applied to highly conserved sequences that have not had much evolutionary time to differentiate. UniDip may be well suited to these regions both because there has not been time for motifs to become highly misaligned and because — as long as there is some difference of level between the signal and noise — it does not matter to UniDip what level of conservation the background sequence is at. Other algorithms might struggle when creating a model where so much of the background matches itself. But UniDip's core assumptions do not have that problem</p>
+<p>Second, we have so far only examined motif discovery as a univariate problem. It may be more useful to understand the problem as multi-dimensional, with each sample sequence acting as its own vector. UniDip's multivariate extension, SkinnyDip, could be extremely useful to this understanding of the problem, and provide more accurate results. Using the numeric edit distances provided from pairwise alignments has the potential to avoid many of the problems with misalignment seen in this paper. And, perhaps allow SkinnyDip to function as a self-contained motif finding algorithm.</p>
+<h1 id="citations-materials">Citations &amp; Materials</h1>
+<h2 id="supplementary-materials">Supplementary Materials</h2>
+<p><strong>UniDip implementation</strong>: <a href="https://github.com/BenjaminDoran/unidip" class="uri">https://github.com/BenjaminDoran/unidip</a></p>
+<p><strong>UniDip Examples</strong>: <a href="https://github.com/BenjaminDoran/bio-unidip-examples" class="uri">https://github.com/BenjaminDoran/bio-unidip-examples</a></p>
+<p><strong>FOXK1 TFBS Retrieval Script</strong>: <a href="https://github.com/BenjaminDoran/Motif-Dataset" class="uri">https://github.com/BenjaminDoran/Motif-Dataset</a></p>
+<h2 id="references">References</h2>
+<!-- References are auto generated -->
+<div id="refs" class="references">
+<div id="ref-das_survey_2007">
+<p>[1] M. K. Das and H.-K. Dai, “A survey of DNA motif finding algorithms,” <em>BMC Bioinformatics</em>, vol. 8, no. 7, p. S21, 2007.</p>
+</div>
+<div id="ref-tompa_assessing_2005">
+<p>[2] M. Tompa <em>et al.</em>, “Assessing computational tools for the discovery of transcription factor binding sites,” <em>Nature Biotechnology</em>, vol. 23, no. 1, pp. 137–144, Jan. 2005.</p>
+</div>
+<div id="ref-sandve_improved_2007">
+<p>[3] G. K. Sandve, O. Abul, V. Walseng, and F. Drabløs, “Improved benchmarks for computational motif discovery,” <em>BMC Bioinformatics</em>, vol. 8, p. 193, Jun. 2007.</p>
+</div>
+<div id="ref-simcha_limits_2012">
+<p>[4] D. Simcha, N. D. Price, and D. Geman, “The Limits of De Novo DNA Motif Discovery,” <em>PLOS ONE</em>, vol. 7, no. 11, p. e47836, Nov. 2012.</p>
+</div>
+<div id="ref-hu_limitations_2005">
+<p>[5] J. Hu, B. Li, and D. Kihara, “Limitations and potentials of current motif discovery algorithms,” <em>Nucleic Acids Research</em>, vol. 33, no. 15, pp. 4899–4913, Jan. 2005.</p>
+</div>
+<div id="ref-mathelier_a._fornes_o._arenillas_d.j._chen_c._denay_g._lee_j._shi_w._shyr_c._tan_g._worsley-hunt_r._et_al._jaspar_2015">
+<p>[6] F. Mathelier A., “The JASPAR database,” <em>JASPAR 2016: a major expansion and update of the open-access database of transcription factor binding profiles</em>. 2015.</p>
+</div>
+<div id="ref-hung_motif_2017">
+<p>[7] J.-H. Hung and Z. Weng, “Motif Finding,” <em>Cold Spring Harbor Protocols</em>, vol. 2017, no. 2, p. pdb.top093195, Feb. 2017.</p>
+</div>
+<div id="ref-schneider_sequence_1990">
+<p>[8] T. D. Schneider and R. M. Stephens, “Sequence logos: A new way to display consensus sequences.” <em>Nucleic Acids Research</em>, vol. 18, no. 20, pp. 6097–6100, Oct. 1990.</p>
+</div>
+<div id="ref-hannenhalli_eukaryotic_2008">
+<p>[9] S. Hannenhalli, “Eukaryotic transcription factor binding sites—modeling and integrative search methods,” <em>Bioinformatics</em>, vol. 24, no. 11, pp. 1325–1331, Jun. 2008.</p>
+</div>
+<div id="ref-ncbiresourcecoordinators_database_2017">
+<p>[10] NCBI Resource Coordinators, “Database Resources of the National Center for Biotechnology Information,” <em>Nucleic Acids Research</em>, vol. 45, no. D1, pp. D12–D17, Jan. 2017.</p>
+</div>
+<div id="ref-jones_introduction_2004">
+<p>[11] N. C. Jones, <em>An introduction to bioinformatics algorithms</em>. Cambridge, Mass.: MIT Press, 2004.</p>
+</div>
+<div id="ref-pavesi_algorithm_2001">
+<p>[12] G. Pavesi, G. Mauri, and G. Pesole, “An algorithm for finding signals of unknown length in DNA sequences,” <em>Bioinformatics (Oxford, England)</em>, vol. 17 Suppl 1, pp. S207–214, 2001.</p>
+</div>
+<div id="ref-carvalho_efficient_2004">
+<p>[13] A. M. Carvalho, A. T. Freitas, A. L. Oliveira, and M.-F. Sagot, “Efficient Extraction of Structured Motifs Using Box-Links,” in <em>String Processing and Information Retrieval</em>, 2004, pp. 267–268.</p>
+</div>
+<div id="ref-heather_sequence_2016">
+<p>[14] J. M. Heather and B. Chain, “The sequence of sequencers: The history of sequencing DNA,” <em>Genomics</em>, vol. 107, no. 1, pp. 1–8, Jan. 2016.</p>
+</div>
+<div id="ref-maurus_skinny-dip:_2016">
+<p>[15] S. Maurus and C. Plant, “Skinny-dip: Clustering in a Sea of Noise,” in <em>Proceedings of the 22Nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, 2016, pp. 1055–1064.</p>
+</div>
+<div id="ref-hartigan_dip_1985">
+<p>[16] J. A. Hartigan and P. M. Hartigan, “The Dip Test of Unimodality,” <em>The Annals of Statistics</em>, vol. 13, no. 1, pp. 70–84, Mar. 1985.</p>
+</div>
+<div id="ref-samhelmholtz_skinny-dip:_2017">
+<p>[17] samhelmholtz, “Skinny-dip: Code and supplementary material from the KDD 2016 paper ‘Skinny-dip: Clustering in a sea of noise’ by Samuel Maurus and Claudia Plant.” Sep-2017.</p>
+</div>
+<div id="ref-bauer_dip_test:_2018">
+<p>[18] J. Bauer, “Dip_test: Python implementation of the Hartigans’ dip test.” Feb-2018.</p>
+</div>
+<div id="ref-machler_dip_2016">
+<p>[19] M. Machler, “Dip Test Distributions, P-values, and other Explorations,” <em>CRAN project</em>. Dec-2016.</p>
+</div>
+<div id="ref-edgar_muscle:_2004">
+<p>[20] R. C. Edgar, “MUSCLE: Multiple sequence alignment with high accuracy and high throughput,” <em>Nucleic Acids Research</em>, vol. 32, no. 5, pp. 1792–1797, 2004.</p>
+</div>
+<div id="ref-panda_transcription_2015">
+<p>[21] D. Panda, B. Gold, M. A. Tartell, K. Rausch, S. Casas-Tinto, and S. Cherry, “The transcription factor FoxK participates with Nup98 to regulate antiviral gene expression,” <em>mBio</em>, vol. 6, no. 2, Apr. 2015.</p>
+</div>
+<div id="ref-bailey_meme_2009">
+<p>[22] T. L. Bailey <em>et al.</em>, “MEME Suite: Tools for motif discovery and searching,” <em>Nucleic Acids Research</em>, vol. 37, no. suppl_2, pp. W202–W208, Jul. 2009.</p>
+</div>
+</div>
+</body>
+</html>
