@@ -8,7 +8,7 @@ This section describes biologic motif's common representations, including point 
 
 Biological motifs are short conserved patterns of similar or identical sequence instances as found in DNA. An example motif is the ALX3 transcription factor binding site (TFBS), MA0634.1. By controlling the expression of key genes, MA0634.1 serves a role regulating skeletal and mesoderm morphogenesis [@mathelier_a._fornes_o._arenillas_d.j._chen_c._denay_g._lee_j._shi_w._shyr_c._tan_g._worsley-hunt_r._et_al._jaspar_2015]. Falling within the range of 6-30bp (base pairs) long, the ALX3 TFBS is a good example of a TFBS motif. The TFBS also has 8033 reviewed samples, providing extensive supporting evidence of its role. 
 
-![Fig. 1: Motif logo for MA0634.1](./imgs/MA0634.1.svg)
+![Fig. 1: Motif logo for MA0634.1](./imgs/MA0634.1.png)
 
 The best visualization of MA0634.1 is with a motif logo. At the core of this image is a numeric representation known as a "point frequency matrix" (PFM) [@hung_motif_2017]. In PFMs each row is labeled by a base nucleotide, and the columns indicate the tally of bases at the column's position in the sequences. 
 

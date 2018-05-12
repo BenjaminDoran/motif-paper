@@ -9,7 +9,7 @@ We will evaluate UniDip on real genomic sequences by performing a sequence analy
 
 The JASPER database contains 1056 instances of this TFBS, which compile into the below logo. 
 
-![Fig. 17: JASPER logo for MA0852.2](./imgs/MA0852.2.svg)
+![Fig. 17: JASPER logo for MA0852.2](./imgs/MA0852.2.png)
 
 The instances in the JASPER database are not useful for evaluating UniDip on real sequences. While the JASPER instances do have some of the surrounding sequence, the extensions are short and centered around the motif instance. JASPER does provide a `.bed` file which contains the genomic coordinates. For the latest version of MA0852.2 all sequences are located in the GRCh38.p12 human genome assembly [@ncbiresourcecoordinators_database_2017]. Our preferred method for extracting these motif instances would be to track the gene associated with each instance and pull the 1000bp upstream sequence from the transcription start site. Unfortunately, JASPER does not track the associated genes. So instead, we emulate how the motif instances would likely occur throughout the 1000bp sequences, by randomly selecting 1000 bases up and down stream of the motif instance such that the overall sequence remains 1000bp long. 
 

@@ -51,7 +51,7 @@
 <h3 id="representation">Representation</h3>
 <p>Biological motifs are short conserved patterns of similar or identical sequence instances as found in DNA. An example motif is the ALX3 transcription factor binding site (TFBS), MA0634.1. By controlling the expression of key genes, MA0634.1 serves a role regulating skeletal and mesoderm morphogenesis <span class="citation">[<a href="#ref-mathelier_a._fornes_o._arenillas_d.j._chen_c._denay_g._lee_j._shi_w._shyr_c._tan_g._worsley-hunt_r._et_al._jaspar_2015">6</a>]</span>. Falling within the range of 6-30bp (base pairs) long, the ALX3 TFBS is a good example of a TFBS motif. The TFBS also has 8033 reviewed samples, providing extensive supporting evidence of its role.</p>
 <div class="figure">
-<img src="./imgs/MA0634.1.svg" alt="Fig. 1: Motif logo for MA0634.1" />
+<img src="./imgs/MA0634.1.png" alt="Fig. 1: Motif logo for MA0634.1" />
 <p class="caption">Fig. 1: Motif logo for MA0634.1</p>
 </div>
 <p>The best visualization of MA0634.1 is with a motif logo. At the core of this image is a numeric representation known as a &quot;point frequency matrix&quot; (PFM) <span class="citation">[<a href="#ref-hung_motif_2017">7</a>]</span>. In PFMs each row is labeled by a base nucleotide, and the columns indicate the tally of bases at the column's position in the sequences.</p>
@@ -276,7 +276,7 @@ else:
 <p>We will evaluate UniDip on real genomic sequences by performing a sequence analysis case study on MA0852.2, the binding site to the FOXK1 transcription factor. As categorized in the JASPER database <span class="citation">[<a href="#ref-mathelier_a._fornes_o._arenillas_d.j._chen_c._denay_g._lee_j._shi_w._shyr_c._tan_g._worsley-hunt_r._et_al._jaspar_2015">6</a>]</span>, FOXK1 is a transcription factor in the class of Fork head / winged helix factors, and is known to regulate antiviral gene expression <span class="citation">[<a href="#ref-panda_transcription_2015">21</a>]</span>.</p>
 <p>The JASPER database contains 1056 instances of this TFBS, which compile into the below logo.</p>
 <div class="figure">
-<img src="./imgs/MA0852.2.svg" alt="Fig. 17: JASPER logo for MA0852.2" />
+<img src="./imgs/MA0852.2.png" alt="Fig. 17: JASPER logo for MA0852.2" />
 <p class="caption">Fig. 17: JASPER logo for MA0852.2</p>
 </div>
 <p>The instances in the JASPER database are not useful for evaluating UniDip on real sequences. While the JASPER instances do have some of the surrounding sequence, the extensions are short and centered around the motif instance. JASPER does provide a <code>.bed</code> file which contains the genomic coordinates. For the latest version of MA0852.2 all sequences are located in the GRCh38.p12 human genome assembly <span class="citation">[<a href="#ref-ncbiresourcecoordinators_database_2017">10</a>]</span>. Our preferred method for extracting these motif instances would be to track the gene associated with each instance and pull the 1000bp upstream sequence from the transcription start site. Unfortunately, JASPER does not track the associated genes. So instead, we emulate how the motif instances would likely occur throughout the 1000bp sequences, by randomly selecting 1000 bases up and down stream of the motif instance such that the overall sequence remains 1000bp long.</p>
